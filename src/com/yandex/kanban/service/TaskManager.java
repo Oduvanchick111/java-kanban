@@ -1,7 +1,11 @@
+package com.yandex.kanban.service;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
-
+import com.yandex.kanban.model.Epic;
+import com.yandex.kanban.model.Status;
+import com.yandex.kanban.model.Task;
+import com.yandex.kanban.model.Subtask;
 public class TaskManager {
     public int countTasks = 1;
     private final HashMap<Integer, Task> tasks;
@@ -9,7 +13,7 @@ public class TaskManager {
     private final HashMap<Integer, Epic> epics;
 
 
-    TaskManager() {
+    public TaskManager() {
         tasks = new HashMap<>();
         subtasks = new HashMap<>();
         epics = new HashMap<>();

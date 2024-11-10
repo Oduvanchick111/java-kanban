@@ -1,3 +1,10 @@
+package com.yandex.kanban;
+import com.yandex.kanban.model.Epic;
+import com.yandex.kanban.model.Status;
+import com.yandex.kanban.model.Subtask;
+import com.yandex.kanban.model.Task;
+import com.yandex.kanban.service.TaskManager;
+
 public class Main {
 
     public static void main(String[] args) {

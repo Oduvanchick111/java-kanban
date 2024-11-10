@@ -1,3 +1,5 @@
+package com.yandex.kanban.model;
+
 import java.util.Objects;
 
 public class Task {
