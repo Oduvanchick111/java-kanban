@@ -2,15 +2,18 @@ import java.util.Objects;
 
 public class Task {
 
-    private final String name;
-    private final String details;
+    private String name;
+    private String details;
     private Status status;
-    private final int id;
+    private int id;
 
-    public Task(String name, String details, int id) {
+    public Task(String name, String details) {
         this.name = name;
         this.details = details;
         this.status = Status.NEW;
+    }
+
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -22,9 +25,16 @@ public class Task {
         return details;
     }
 
-
     public Status getStatus() {
         return status;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 
     public void setStatus(Status status) {
@@ -34,7 +44,6 @@ public class Task {
     public int getId() {
         return id;
     }
-
 
     @Override
     public String toString() {
