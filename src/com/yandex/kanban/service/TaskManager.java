@@ -2,12 +2,14 @@ package com.yandex.kanban.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.Subtask;
+
 public class TaskManager {
-    public int countTasks = 1;
+    private int countTasks = 1;
     private final HashMap<Integer, Task> tasks;
     private final HashMap<Integer, Subtask> subtasks;
     private final HashMap<Integer, Epic> epics;
@@ -18,6 +20,7 @@ public class TaskManager {
         subtasks = new HashMap<>();
         epics = new HashMap<>();
     }
+
 
     public Task getTask(int id) {
         return tasks.get(id);
@@ -47,11 +50,13 @@ public class TaskManager {
         tasks.clear();
     }
 
-    public void removeAllSubtaks() {
+    public void removeAllSubtasks() {
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.getSubtasksId().clear();
+            updateEpicStatus(epic);
         }
+
     }
 
     public void removeAllEpics() {
@@ -74,9 +79,7 @@ public class TaskManager {
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicId());
         epic.getSubtasksId().add(subtask.getId());
-        for (Integer subtaskId : epic.getSubtasksId()) {
-            Subtask anySubtask = subtasks.get(subtaskId);
-        }
+        updateEpicStatus(epic);
     }
 
     public void removeTaskById(int id) {
@@ -84,10 +87,10 @@ public class TaskManager {
     }
 
     public void removeSubtaskById(int id) {
-        for (Epic epic : epics.values()) {
-            epic.getSubtasksId().remove(id);
-        }
+        Epic epic = epics.get(subtasks.get(id).getEpicId());
+        epic.getSubtasksId().remove(id);
         subtasks.remove(id);
+        updateEpicStatus(epic);
     }
 
     public void removeEpicById(int id) {
@@ -104,55 +107,36 @@ public class TaskManager {
     public void updateSubtask(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicId());
-        boolean allDone = true;
-        boolean allNew = true;
-        for (Integer subtaskId : epic.getSubtasksId()) {
-            if (subtasks.get(subtaskId).getStatus() != Status.DONE) {
-                allDone = false;
-            }
-            if (subtasks.get(subtaskId).getStatus() != Status.NEW) {
-                allNew = false;
-            }
-        }
-        if (allDone) {
-            epic.setStatus(Status.DONE);
-        } else if (allNew) {
-            epic.setStatus(Status.NEW);
-        } else {
-            epic.setStatus(Status.IN_PROGRESS);
-        }
+        updateEpicStatus(epic);
     }
+
     public void updateEpic(Epic epic) {
         Epic oldEpic = epics.get(epic.getId());
         oldEpic.setName(epic.getName());
         oldEpic.setDetails(epic.getDetails());
     }
 
-    public ArrayList<Subtask> getSubtasks(Epic epic) {
-        ArrayList<Subtask> subtaskList = new ArrayList<>();
-        for (Integer subtaskId : epic.getSubtasksId()) {
-            subtaskList.add(subtasks.get(subtaskId));
+    public ArrayList<Subtask> getSubtasks(Integer epicId) {
+        ArrayList<Subtask> subtasksValues = new ArrayList<>();
+        ArrayList<Integer> subtasksId = epics.get(epicId).getSubtasksId();
+        for (Integer subtaskId : subtasksId) {
+            subtasksValues.add(subtasks.get(subtaskId));
         }
-        return subtaskList;
-    }
-    public void updateTaskStatus(Task task, Status status) {
-        task.setStatus(status);
+        return subtasksValues;
     }
 
-    public void updateSubtaskStatus(Subtask subtask, Status status) {
-        subtask.setStatus(status);
-    }
-    public void updateEpicStatus(Epic epic) {
+    private void updateEpicStatus(Epic epic) {
         if (epic.getSubtasksId().isEmpty()) {
             epic.setStatus(Status.NEW);
         } else {
             boolean allDone = true;
             boolean allNew = true;
             for (Integer subtaskId : epic.getSubtasksId()) {
-                if (subtasks.get(subtaskId).getStatus() != Status.DONE) {
+                Status subtaskStatus = subtasks.get(subtaskId).getStatus();
+                if (subtaskStatus != Status.DONE) {
                     allDone = false;
                 }
-                if (subtasks.get(subtaskId).getStatus() != Status.NEW) {
+                if (subtaskStatus != Status.NEW) {
                     allNew = false;
                 }
             }

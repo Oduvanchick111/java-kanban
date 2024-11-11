@@ -26,13 +26,16 @@ public class Main {
         System.out.println(taskManager.getAllTasks());
         System.out.println(taskManager.getAllEpics());
         System.out.println(taskManager.getAllSubtasks());
-        taskManager.updateTaskStatus(task1, Status.DONE);
-        taskManager.updateTaskStatus(task2, Status.IN_PROGRESS);
-        taskManager.updateSubtaskStatus(subtask1, Status.DONE);
-        taskManager.updateSubtaskStatus(subtask2, Status.DONE);
-        taskManager.updateSubtaskStatus(subtask3, Status.IN_PROGRESS);
-        taskManager.updateEpicStatus(epic1);
-        taskManager.updateEpicStatus(epic2);
+        task1.setStatus(Status.DONE);
+        task2.setStatus(Status.IN_PROGRESS);
+        subtask1.setStatus(Status.DONE);
+        subtask2.setStatus(Status.DONE);
+        subtask3.setStatus(Status.IN_PROGRESS);
+        taskManager.updateTask(task1);
+        taskManager.updateTask(task2);
+        taskManager.updateSubtask(subtask1);
+        taskManager.updateSubtask(subtask2);
+        taskManager.updateSubtask(subtask3);
         System.out.println("__________________________________________________________________");
         System.out.println(taskManager.getAllTasks());
         System.out.println(taskManager.getAllEpics());
@@ -43,6 +46,5 @@ public class Main {
         System.out.println(taskManager.getAllTasks());
         System.out.println(taskManager.getAllEpics());
         System.out.println(taskManager.getAllSubtasks());
-
     }
 }
