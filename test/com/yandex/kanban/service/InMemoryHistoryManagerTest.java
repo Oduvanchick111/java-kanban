@@ -1,14 +1,36 @@
-package com.yandex.kanban;
-import com.yandex.kanban.model.Epic;
-import com.yandex.kanban.model.Subtask;
+package com.yandex.kanban.service;
+
 import com.yandex.kanban.model.Task;
-import com.yandex.kanban.service.InMemoryTaskManager;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class InMemoryHistoryManagerTest {
 
 
-public class Main {
+    InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) Managers.getDefault();
 
-    public static void main(String[] args) {
-        InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
+    @Test
+    void addHistory() {
+        Task task1 = new Task("Таск 1", "Поесть");
+        inMemoryTaskManager.createTask(task1);
+        inMemoryTaskManager.getTask(task1.getId());
+        final Task savedTask = inMemoryTaskManager.getHistoryManager().getHistory().get(task1.getId()-1);
+
+        assertNotNull(savedTask, "Задача не найдена.");
+        assertEquals(task1, savedTask, "Задачи не совпадают.");
+
+        final ArrayList<Task> tasks = inMemoryTaskManager.getHistoryManager().getHistory();
+
+        assertNotNull(tasks, "Задачи не возвращаются.");
+        assertEquals(1, tasks.size(), "Неверное количество задач.");
+        assertEquals(task1, tasks.getFirst(), "Задачи не совпадают.");
+    }
+
+    @Test
+    void addHistoryMoreThan10(){
         Task task1 = new Task("Таск 1", "Поесть");
         Task task2 = new Task("Таск2", "Поспать");
         Task task3 = new Task("Таск3", "Поспать");
@@ -21,15 +43,6 @@ public class Main {
         Task task10 = new Task("Таск10", "Поспать");
         Task task11 = new Task("Таск11", "Поспать");
         Task task12 = new Task("Таск12", "Поспать");
-        Epic epic1 = new Epic("Сделать 4 спринт", "Исправить замечания");
-        Epic epic2 = new Epic("Убраться", "Убрать хату");
-//        inMemoryTaskManager.createEpic(epic1);
-//        inMemoryTaskManager.createEpic(epic2);
-
-        System.out.println(epic1.getId());
-        Subtask subtask1 = new Subtask("Замечания", "Добавить реализацию мейна", epic1.getId());
-        Subtask subtask2 = new Subtask("Сдача", "Отправить на проверку", epic2.getId());
-        Subtask subtask3 = new Subtask("Пропылесосить", "Пропылеосить на кухне", epic2.getId());
         inMemoryTaskManager.createTask(task1);
         inMemoryTaskManager.createTask(task2);
         inMemoryTaskManager.createTask(task3);
@@ -42,20 +55,11 @@ public class Main {
         inMemoryTaskManager.createTask(task10);
         inMemoryTaskManager.createTask(task11);
         inMemoryTaskManager.createTask(task12);
-//        inMemoryTaskManager.createSubtask(subtask1);
-//        inMemoryTaskManager.createSubtask(subtask2);
-//        inMemoryTaskManager.createSubtask(subtask3);
         for (Task task: inMemoryTaskManager.getAllTasks()) {
             inMemoryTaskManager.getTask(task.getId());
         }
-        for (Subtask subtask: inMemoryTaskManager.getAllSubtasks()) {
-            inMemoryTaskManager.getSubtask(subtask.getId());
-        }
-        for (Epic epic: inMemoryTaskManager.getAllEpics()) {
-            inMemoryTaskManager.getEpic(epic.getId());
-        }
-
-
-
+        final ArrayList<Task> tasks = inMemoryTaskManager.getHistoryManager().getHistory();
+        assertEquals(10, tasks.size(), "Неверное количество задач.");
+        assertEquals("Таск3", tasks.getFirst().getName(), "Неверное имя");
     }
 }
