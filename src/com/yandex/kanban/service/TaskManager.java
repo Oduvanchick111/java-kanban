@@ -6,6 +6,7 @@ import com.yandex.kanban.model.Task;
 
 import java.util.ArrayList;
 
+
 public interface TaskManager {
     Task getTask(int id);
 
@@ -44,5 +45,7 @@ public interface TaskManager {
     void updateEpic(Epic epic);
 
     ArrayList<Subtask> getSubtasks(Integer epicId);
+
+    ArrayList<Task> history();
 
 }

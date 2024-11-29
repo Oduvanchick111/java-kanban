@@ -17,12 +17,12 @@ class InMemoryHistoryManagerTest {
         Task task1 = new Task("Таск 1", "Поесть");
         inMemoryTaskManager.createTask(task1);
         inMemoryTaskManager.getTask(task1.getId());
-        final Task savedTask = inMemoryTaskManager.getHistoryManager().getHistory().get(task1.getId()-1);
+        final Task savedTask = inMemoryTaskManager.history().get(task1.getId()-1);
 
         assertNotNull(savedTask, "Задача не найдена.");
         assertEquals(task1, savedTask, "Задачи не совпадают.");
 
-        final ArrayList<Task> tasks = inMemoryTaskManager.getHistoryManager().getHistory();
+        final ArrayList<Task> tasks = inMemoryTaskManager.history();
 
         assertNotNull(tasks, "Задачи не возвращаются.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
@@ -58,8 +58,31 @@ class InMemoryHistoryManagerTest {
         for (Task task: inMemoryTaskManager.getAllTasks()) {
             inMemoryTaskManager.getTask(task.getId());
         }
-        final ArrayList<Task> tasks = inMemoryTaskManager.getHistoryManager().getHistory();
+        final ArrayList<Task> tasks = inMemoryTaskManager.history();
         assertEquals(10, tasks.size(), "Неверное количество задач.");
         assertEquals("Таск3", tasks.getFirst().getName(), "Неверное имя");
+    }
+
+    @Test
+    void removeTasks(){
+        Task task = new Task("Таск1", "Поспать");
+        inMemoryTaskManager.createTask(task);
+        inMemoryTaskManager.getTask(task.getId());
+        final Task savedTask = inMemoryTaskManager.history().get(task.getId()-1);
+        assertEquals(savedTask, task, "Задачи не совпадают");
+        inMemoryTaskManager.removeTaskById(task.getId()-1);
+        assertEquals(0, inMemoryTaskManager.history().size(), "Лист не пустой");
+    }
+
+    @Test
+    void removeMoreThanOne() {
+        Task task1 = new Task("Таск1", "Поесть");
+        Task task2 = new Task("Таск2", "Поспать");
+        inMemoryTaskManager.createTask(task1);
+        inMemoryTaskManager.createTask(task2);
+        inMemoryTaskManager.getTask(task1.getId());
+        inMemoryTaskManager.getTask(task2.getId());
+        inMemoryTaskManager.removeAllTasks();
+        assertEquals(0, inMemoryTaskManager.history().size(), "Лист не пустой");
     }
 }

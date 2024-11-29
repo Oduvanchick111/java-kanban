@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
-    InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) Managers.getDefault();
+    TaskManager inMemoryTaskManager = Managers.getDefault();
 
     @Test
     void addNewTask() {
@@ -53,6 +53,7 @@ class InMemoryTaskManagerTest {
         Epic epic = new Epic("Epic1", "Details1");
         inMemoryTaskManager.createEpic(epic);
         Subtask subtask = new Subtask("Subtask1", "Details2", epic.getId());
+        inMemoryTaskManager.createSubtask(subtask);
 
         final Subtask savedSubtask = inMemoryTaskManager.getSubtask(subtask.getId());
 

@@ -54,6 +54,7 @@ public class Main {
         for (Epic epic: inMemoryTaskManager.getAllEpics()) {
             inMemoryTaskManager.getEpic(epic.getId());
         }
+        System.out.println(inMemoryTaskManager.history().get(0).getName());
 
 
 
