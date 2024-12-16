@@ -7,6 +7,7 @@ import com.yandex.kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -111,13 +112,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskById(int id) {
-        historyManager.getHistory().remove(id);
+        if (historyManager.getHistory().contains(tasks.get(id))) {
+            historyManager.remove(id);
+        }
         tasks.remove(id);
     }
 
     @Override
     public void removeSubtaskById(int id) {
-        historyManager.remove(id);
+        if (historyManager.getHistory().contains(subtasks.get(id))) {
+            historyManager.remove(id);
+        }
         Epic epic = epics.get(subtasks.get(id).getEpicId());
         epic.getSubtasksId().remove((Integer) id);
         subtasks.remove(id);
@@ -126,7 +131,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeEpicById(int id) {
-        historyManager.remove(id);
+        if (historyManager.getHistory().contains(epics.get(id))) {
+            historyManager.remove(id);
+        }
         for (Integer subtaskId : epics.get(id).getSubtasksId()) {
             subtasks.remove(subtaskId);
         }
@@ -163,7 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> history() {
+    public List<Task> history() {
         return historyManager.getHistory();
     }
 
