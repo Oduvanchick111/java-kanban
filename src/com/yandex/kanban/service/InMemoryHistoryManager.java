@@ -5,7 +5,6 @@ import com.yandex.kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -81,6 +80,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void remove(int id) {
         if (historyMap.containsKey(id)) {
             removeNode(historyMap.get(id));
+            historyMap.remove(id); //Не уверен нужна ли эта строка, просто, по идее, при использовании removeNode я просто переопределяю ссылки, но Таск все еще хранится в мапе и память занимает или нет...)
         }
     }
 }
