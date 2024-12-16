@@ -18,7 +18,7 @@ class InMemoryHistoryManagerTest {
         Task task1 = new Task("Таск 1", "Поесть");
         taskManager.createTask(task1);
         taskManager.getTask(task1.getId());
-        final Task savedTask = taskManager.history().get(task1.getId()-1);
+        final Task savedTask = taskManager.history().get(task1.getId() - 1);
 
         assertNotNull(savedTask, "Задача не найдена.");
         assertEquals(task1, savedTask, "Задачи не совпадают.");
@@ -31,13 +31,12 @@ class InMemoryHistoryManagerTest {
     }
 
 
-
     @Test
-    void removeTasks(){
+    void removeTasks() {
         Task task = new Task("Таск1", "Поспать");
         taskManager.createTask(task);
         taskManager.getTask(task.getId());
-        final Task savedTask = taskManager.history().get(task.getId()-1);
+        final Task savedTask = taskManager.history().get(task.getId() - 1);
         assertEquals(savedTask, task, "Задачи не совпадают");
         taskManager.removeTaskById(task.getId());
         System.out.println(taskManager.history().size());
