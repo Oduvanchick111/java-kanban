@@ -3,6 +3,7 @@ package com.yandex.kanban.service;
 import com.yandex.kanban.model.Node;
 import com.yandex.kanban.model.Task;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,8 +46,9 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     public void removeNode(Node<Task> node) {
+        Node<Task> prev = node.getPrev();
+        Node <Task> next = node.getNext();
         if (node.getNext() == null) {
-            Node<Task> prev = node.getPrev();
             tail = prev;
             if (prev != null) {
                 prev.setNext(null);
@@ -55,12 +57,9 @@ public class InMemoryHistoryManager implements HistoryManager {
             }
 
         } else if (node.getPrev() == null) {
-            Node<Task> next = node.getNext();
             head = next;
             next.setPrev(null);
         } else {
-            Node<Task> next = node.getNext();
-            Node<Task> prev = node.getPrev();
             prev.setNext(next);
             next.setPrev(prev);
         }
@@ -72,7 +71,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
+    public List<Task> getHistory() {
         return getTasks();
     }
 
@@ -80,7 +79,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void remove(int id) {
         if (historyMap.containsKey(id)) {
             removeNode(historyMap.get(id));
-            historyMap.remove(id); //Не уверен нужна ли эта строка, просто, по идее, при использовании removeNode я просто переопределяю ссылки, но Таск все еще хранится в мапе и память занимает или нет...)
+            historyMap.remove(id);
         }
     }
 }
