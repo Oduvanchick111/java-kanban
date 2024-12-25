@@ -60,6 +60,7 @@ class InMemoryHistoryManagerTest {
         taskManager.getTask(task1.getId());
         assertEquals(task1, taskManager.history().get(3));
         assertEquals(task2, taskManager.history().get(0));
+        assertEquals(4, taskManager.history().size());
     }
 
 }

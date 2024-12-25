@@ -1,6 +1,5 @@
 package com.yandex.kanban.service;
 
-import com.yandex.kanban.model.Node;
 import com.yandex.kanban.model.Task;
 
 import java.util.List;
@@ -11,14 +10,11 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    Map<Integer, Node<Task>> historyMap = new HashMap<>();
+    private final Map<Integer, Node<Task>> historyMap = new HashMap<>();
     private Node<Task> tail;
     private Node<Task> head;
 
     public void linkLast(Task task) {
-        if (historyMap.containsKey(task.getId())) {
-            removeNode(historyMap.get(task.getId()));
-        }
         Node<Task> node = new Node<>(task);
         if (historyMap.isEmpty()) {
             tail = node;
@@ -67,6 +63,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
+        if (historyMap.containsKey(task.getId())) {
+            removeNode(historyMap.get(task.getId()));
+        }
         linkLast(task);
     }
 
@@ -77,9 +76,40 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        if (historyMap.containsKey(id)) {
-            removeNode(historyMap.get(id));
-        }
+        removeNode(historyMap.get(id));
         historyMap.remove(id);
     }
+
+    private static class Node<T> {
+        private final T data;
+        private Node<T> next;
+        private Node<T> prev;
+
+        public Node(T data) {
+            this.data = data;
+            this.next = null;
+            this.prev = null;
+        }
+
+        public T getData() {
+            return data;
+        }
+
+        public Node<T> getNext() {
+            return next;
+        }
+
+        public void setNext(Node<T> next) {
+            this.next = next;
+        }
+
+        public Node<T> getPrev() {
+            return prev;
+        }
+
+        public void setPrev(Node<T> prev) {
+            this.prev = prev;
+        }
+    }
 }
+
