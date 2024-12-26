@@ -87,5 +87,21 @@ class InMemoryTaskManagerTest {
         assertEquals(epic1, epic2, "Задачи не совпадают.");
     }
 
+    @Test
+    void actualSubtasksInEpic() {
+        Epic epic1 = new Epic("Epic1", "Описание1");
+        inMemoryTaskManager.createEpic(epic1);
+        Subtask subtask1 = new Subtask("Сабтаск1", "Описание1", epic1.getId());
+        Subtask subtask2 = new Subtask("Сабтаск2", "Описание2", epic1.getId());
+        inMemoryTaskManager.createSubtask(subtask1);
+        inMemoryTaskManager.createSubtask(subtask2);
+        inMemoryTaskManager.getEpic(epic1.getId());
+        inMemoryTaskManager.getSubtask(subtask1.getId());
+        inMemoryTaskManager.getSubtask(subtask2.getId());
+        assertEquals(2, inMemoryTaskManager.getEpic(epic1.getId()).getSubtasksId().size(), "Сабтаски не добавились в эпик");
+        inMemoryTaskManager.removeSubtaskById(subtask1.getId());
+        assertEquals(false, inMemoryTaskManager.getEpic(epic1.getId()).getSubtasksId().contains(subtask2));
+    }
+
 
 }
