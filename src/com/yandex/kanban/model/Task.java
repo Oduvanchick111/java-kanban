@@ -47,6 +47,10 @@ public class Task {
         return id;
     }
 
+    public Type getType() {
+        return Type.TASK;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
