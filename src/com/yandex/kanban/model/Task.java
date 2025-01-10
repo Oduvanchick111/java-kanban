@@ -14,6 +14,11 @@ public class Task {
         this.details = details;
         this.status = Status.NEW;
     }
+    public Task(String name, String details, Status status) {
+        this.name = name;
+        this.details = details;
+        this.status = status;
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -74,4 +79,3 @@ public class Task {
         return Objects.hash(id);
     }
 }
-

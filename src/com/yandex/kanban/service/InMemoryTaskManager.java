@@ -5,7 +5,6 @@ import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,19 +91,25 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void createTask(Task task) {
-        task.setId(countTasks++);
+        if (task.getId() == 0) {
+            task.setId(countTasks++);
+        }
         tasks.put(task.getId(), task);
     }
 
     @Override
     public void createEpic(Epic epic) {
-        epic.setId(countTasks++);
+        if (epic.getId() == 0) {
+            epic.setId(countTasks++);
+        }
         epics.put(epic.getId(), epic);
     }
 
     @Override
     public void createSubtask(Subtask subtask) {
-        subtask.setId(countTasks++);
+        if (subtask.getId() == 0){
+            subtask.setId(countTasks++);
+        }
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicId());
         epic.getSubtasksId().add(subtask.getId());
@@ -199,6 +204,14 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
 
+    }
+
+    public static void main(String[] args) {
+        TaskManager inMemoryTaskManager =  Managers.getDefault();
+        Epic epic = new Epic("Хуй", "Пизда");
+        inMemoryTaskManager.createEpic(epic);
+        Subtask subtask = new Subtask("Говно", "Моча", epic.getId());
+        inMemoryTaskManager.createSubtask(subtask);
     }
 }
 
