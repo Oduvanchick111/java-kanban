@@ -29,7 +29,7 @@ public class Subtask extends Task {
                 ", description='" + getDetails() + '\'' +
                 ", id=" + getId() +
                 ", status=" + getStatus() +
-                ", epicId='" + epicId  + '\'' +
+                ", epicId='" + epicId + '\'' +
                 '}';
     }
 }

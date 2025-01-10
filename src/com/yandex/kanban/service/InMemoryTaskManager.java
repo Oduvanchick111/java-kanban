@@ -61,7 +61,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void removeAllTasks(){
+    public void removeAllTasks() {
         for (Task task : getAllTasks()) {
             historyManager.remove(task.getId());
         }
@@ -107,7 +107,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void createSubtask(Subtask subtask) {
-        if (subtask.getId() == 0){
+        if (subtask.getId() == 0) {
             subtask.setId(countTasks++);
         }
         subtasks.put(subtask.getId(), subtask);
@@ -207,7 +207,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public static void main(String[] args) {
-        TaskManager inMemoryTaskManager =  Managers.getDefault();
+        TaskManager inMemoryTaskManager = Managers.getDefault();
         Epic epic = new Epic("Хуй", "Пизда");
         inMemoryTaskManager.createEpic(epic);
         Subtask subtask = new Subtask("Говно", "Моча", epic.getId());
