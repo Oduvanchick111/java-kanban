@@ -24,23 +24,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public void save() throws ManagerSaveException {
         try (Writer writer = new FileWriter(file)) {
-            writer.write("id,type,name,status,description,epic");
-            writer.write("\n");
+            final String header = "id,type,name,status,description,epic";
+            writer.write(header);
+            writer.write(System.lineSeparator());
             for (Task task : getAllTasks()) {
                 writer.write(toString(task));
-                writer.write("\n");
+                writer.write(System.lineSeparator());
             }
             for (Epic epic : getAllEpics()) {
                 writer.write(toString(epic));
-                writer.write("\n");
+                writer.write(System.lineSeparator());
             }
             for (Subtask subtask : getAllSubtasks()) {
                 writer.write(toString(subtask));
-                writer.write("\n");
+                writer.write(System.lineSeparator());
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Поймано исключение");
+            throw new ManagerSaveException("Ошибка сохранения данных");
         }
     }
 
@@ -49,8 +50,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             reader.readLine();
             while (reader.ready()) {
-                String task = reader.readLine();
-                String[] partOfTask = task.split(",");
+                String line = reader.readLine();
+                String[] partOfTask = line.split(",");
                 int id = Integer.parseInt(partOfTask[0]);
                 Type type = Type.valueOf(partOfTask[1]);
                 String name = partOfTask[2];
@@ -58,9 +59,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Status status = Status.valueOf(partOfTask[3]);
                 switch (type) {
                     case TASK:
-                        Task task1 = new Task(name, description, status);
-                        task1.setId(id);
-                        fileBackedTaskManager.createTask(task1);
+                        Task task = new Task(name, description, status);
+                        task.setId(id);
+                        fileBackedTaskManager.createTask(task);
                         break;
                     case EPIC:
                         Epic epic = new Epic(name, description, status);
@@ -76,7 +77,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Поймано исключение");
+            throw new ManagerSaveException("");
         }
         return fileBackedTaskManager;
     }
@@ -153,11 +154,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    @Override
-    public void updateEpicStatus(Epic epic) {
-        super.updateEpicStatus(epic);
-    }
-
     public String toString(Task task) {
         StringBuilder builder = new StringBuilder();
         builder.append(task.getId()).append(",").append(task.getType()).append(",").append(task.getName()).append(",").append(task.getStatus()).append(",").append(task.getDetails()).append(",");
@@ -169,10 +165,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new File("C:\\Users\\liza1\\OneDrive\\Рабочий стол\\2.txt"));
-        Task task = new Task("Таск1", "Описание1");
-        fileBackedTaskManager.createTask(task);
-        Task task1 = new Task("Таск2", "Описание11");
-        fileBackedTaskManager.createTask(task1);
+        Task firstTask = new Task("Таск1", "Описание1");
+        fileBackedTaskManager.createTask(firstTask);
+        Task secondTask = new Task("Таск2", "Описание11");
+        fileBackedTaskManager.createTask(secondTask);
         Epic epic = new Epic("Эпик1", "Описание2");
         fileBackedTaskManager.createEpic(epic);
         Subtask subtask = new Subtask("Сабатск1", "Описание 3", epic.getId());
