@@ -4,6 +4,7 @@ import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,13 +22,13 @@ public interface TaskManager {
 
     ArrayList<Epic> getAllEpics();
 
-    void removeAllTasks();
+    void removeAllTasks() throws IOException;
 
-    void removeAllSubtasks();
+    void removeAllSubtasks() throws IOException;
 
-    void removeAllEpics();
+    void removeAllEpics() throws IOException;
 
-    void createTask(Task task);
+    void createTask(Task task) throws IOException;
 
     void createEpic(Epic epic);
 

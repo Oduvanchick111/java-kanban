@@ -7,6 +7,7 @@ import com.yandex.kanban.model.Task;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +16,7 @@ class InMemoryTaskManagerTest {
     TaskManager inMemoryTaskManager = Managers.getDefault();
 
     @Test
-    void addNewTask() {
+    void addNewTask() throws IOException {
         Task task = new Task("Уборка", "Пропылесосить");
         inMemoryTaskManager.createTask(task);
 
@@ -69,7 +70,7 @@ class InMemoryTaskManagerTest {
 
 
     @Test
-    void equalsTasks() {
+    void equalsTasks() throws IOException {
         Task task = new Task("Уборка", "Пропылесосить");
         inMemoryTaskManager.createTask(task);
         Task task1 = new Task("Ветеринар", "Свозить собаку в больницу");

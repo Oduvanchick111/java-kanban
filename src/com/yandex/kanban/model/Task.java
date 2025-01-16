@@ -15,6 +15,12 @@ public class Task {
         this.status = Status.NEW;
     }
 
+    public Task(String name, String details, Status status) {
+        this.name = name;
+        this.details = details;
+        this.status = status;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -47,6 +53,10 @@ public class Task {
         return id;
     }
 
+    public Type getType() {
+        return Type.TASK;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -70,4 +80,3 @@ public class Task {
         return Objects.hash(id);
     }
 }
-
