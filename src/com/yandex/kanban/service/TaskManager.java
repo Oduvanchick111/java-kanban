@@ -7,6 +7,7 @@ import com.yandex.kanban.model.Task;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 public interface TaskManager {
@@ -50,6 +51,6 @@ public interface TaskManager {
 
     List<Task> history();
 
-    void updateEpicStatus(Epic epic);
+    Set<Task> getPrioritizedTasks();
 
 }

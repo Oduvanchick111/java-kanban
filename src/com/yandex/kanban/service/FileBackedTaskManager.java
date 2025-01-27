@@ -6,12 +6,14 @@ import com.yandex.kanban.model.*;
 import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+
+import static com.yandex.kanban.model.Task.formatter;
 
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy/HH:mm");
+
     private File file;
 
     public FileBackedTaskManager(File file) {
@@ -170,7 +172,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static void main(String[] args) {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new File("C:\\Users\\PavelB\\Desktop\\1.txt"));
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new File("C:\\Users\\1\\Desktop\\1.txt"));
         Task firstTask = new Task("Таск1", "Описание1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
         fileBackedTaskManager.createTask(firstTask);
         fileBackedTaskManager.save();
@@ -183,7 +185,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 //        fileBackedTaskManager.createSubtask(subtask);
 //        Task task2 = new Task("Таск3", "Описание111");
 //        fileBackedTaskManager.createTask(task2);
-        FileBackedTaskManager fileBackedTaskManager1 = FileBackedTaskManager.loadFromFile(new File("C:\\Users\\PavelB\\Desktop\\1.txt"));
+        FileBackedTaskManager fileBackedTaskManager1 = FileBackedTaskManager.loadFromFile(new File("C:\\Users\\1\\Desktop\\1.txt"));
         System.out.println(fileBackedTaskManager1.getAllTasks());
 //        System.out.println(fileBackedTaskManager1.getAllEpics());
     }

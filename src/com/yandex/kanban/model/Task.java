@@ -2,9 +2,9 @@ package com.yandex.kanban.model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-import static com.yandex.kanban.service.FileBackedTaskManager.formatter;
 
 public class Task {
 
@@ -14,6 +14,7 @@ public class Task {
     private int id;
     private Duration duration;
     private LocalDateTime startTime;
+    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy/HH:mm");
 
 
     public Task(String name, String details) {
@@ -101,8 +102,8 @@ public class Task {
                 ", details='" + details + '\'' +
                 ", status=" + status +
                 ", id=" + id +
-                ", startTime=" + startTime.format(formatter) +
-                ", duration=" + duration.toMinutes() +
+                ", startTime=" + (startTime != null ? startTime.format(formatter) : "null") +
+                ", duration=" + (duration != null ? duration.toMinutes() : "null") +
                 '}';
     }
 

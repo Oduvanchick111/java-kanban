@@ -5,12 +5,10 @@ import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     private int countTasks = 1;
@@ -18,6 +16,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Subtask> subtasks;
     private final Map<Integer, Epic> epics;
     private final HistoryManager historyManager;
+    private final Set<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     public InMemoryTaskManager() {
         tasks = new HashMap<>();
@@ -208,35 +207,66 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void setEpicEndTime(Epic epic) {
-        Duration epicDuration = null;
-        LocalDateTime epicStartTime = null;
-        LocalDateTime epicEndTime = null;
+        Duration epicDuration = Duration.ZERO;
+        Optional<LocalDateTime> epicStartTime = Optional.empty();
+        Optional<LocalDateTime> epicEndTime = Optional.empty();
         if (epic.getSubtasksId() != null) {
             for (Integer subtaskId : epic.getSubtasksId()) {
                 Subtask subtask = subtasks.get(subtaskId);
                 epicDuration = epicDuration.plus(subtask.getDuration());
                 if (subtask.getStartTime() != null) {
-                    if (epicStartTime == null || epicStartTime.isAfter(subtask.getStartTime())) {
-                        epicStartTime = subtask.getStartTime();
-                    }
-                    if (epicEndTime == null || epicEndTime.isBefore(subtask.getEndTime())) {
-                        epicEndTime = subtask.getEndTime();
-                    }
+                    epicEndTime = epicEndTime
+                            .map(endTime -> endTime.isBefore(subtask.getEndTime()) ? subtask.getEndTime() : endTime)
+                            .or(() -> Optional.of(subtask.getEndTime())
+                            );
+                    epicStartTime = epicStartTime
+                            .map(startTime -> startTime.isAfter(subtask.getStartTime()) ? subtask.getStartTime() : startTime)
+                            .or(() -> Optional.of(subtask.getStartTime()));
                 }
             }
         }
         epic.setDuration(epicDuration);
-        epic.setStartTime(epicStartTime);
-        epic.setEndTime(epicEndTime);
+        epic.setStartTime(epicStartTime.orElse(null));
+        epic.setEndTime(epicEndTime.orElse(null));
     }
 
+    @Override
+    public Set<Task> getPrioritizedTasks() {
+        for (Task task : getAllTasks()) {
+            if (task.getStartTime() != null) {
+                prioritizedTasks.add(task);
+            }
+        }
+        for (Epic epic : getAllEpics()) {
+            if (epic.getStartTime() != null) {
+                prioritizedTasks.add(epic);
+            }
+        }
+        for (Subtask subtask : getAllSubtasks()) {
+            if (subtask.getStartTime() != null) {
+                prioritizedTasks.add(subtask);
+            }
+        }
+        return prioritizedTasks;
+    }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         TaskManager inMemoryTaskManager = Managers.getDefault();
-        Epic epic = new Epic("Эпик1", "Описание1");
-        inMemoryTaskManager.createEpic(epic);
-        Subtask subtask = new Subtask("Сабтаск1", "Описание2", epic.getId());
-        inMemoryTaskManager.createSubtask(subtask);
+//        Epic epic = new Epic("Эпик1", "Описание1");
+//        inMemoryTaskManager.createEpic(epic);
+//        Subtask subtask = new Subtask("Сабтаск1", "Описание2", epic.getId());
+//        inMemoryTaskManager.createSubtask(subtask);
+        Task task = new Task("Таск1", "Описание1", Status.NEW, LocalDateTime.of(2008, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
+        Task task1 = new Task("Таск2", "Описание1", Status.NEW, LocalDateTime.of(2005, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
+        Task task2 = new Task("Таск3", "Описание1", Status.NEW, LocalDateTime.of(2007, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
+        Task task3 = new Task("Таск4", "Описание4");
+        inMemoryTaskManager.createTask(task1);
+        inMemoryTaskManager.createTask(task);
+        inMemoryTaskManager.createTask(task2);
+        inMemoryTaskManager.createTask(task3);
+        System.out.println(inMemoryTaskManager.getPrioritizedTasks());
     }
 }
+
+
 
