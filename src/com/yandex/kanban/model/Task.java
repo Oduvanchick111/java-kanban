@@ -1,6 +1,10 @@
 package com.yandex.kanban.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
+
+import static com.yandex.kanban.service.FileBackedTaskManager.formatter;
 
 public class Task {
 
@@ -8,6 +12,9 @@ public class Task {
     private String details;
     private Status status;
     private int id;
+    private Duration duration;
+    private LocalDateTime startTime;
+
 
     public Task(String name, String details) {
         this.name = name;
@@ -19,6 +26,14 @@ public class Task {
         this.name = name;
         this.details = details;
         this.status = status;
+    }
+
+    public Task(String name, String details, Status status, LocalDateTime startTime, Duration duration) {
+        this.name = name;
+        this.details = details;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public void setId(int id) {
@@ -57,6 +72,28 @@ public class Task {
         return Type.TASK;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime != null && duration != null) {
+            return startTime.plus(duration);
+        } return null;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -64,6 +101,8 @@ public class Task {
                 ", details='" + details + '\'' +
                 ", status=" + status +
                 ", id=" + id +
+                ", startTime=" + startTime.format(formatter) +
+                ", duration=" + duration.toMinutes() +
                 '}';
     }
 

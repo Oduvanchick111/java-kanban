@@ -5,6 +5,8 @@ import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -203,14 +205,37 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.setStatus(Status.IN_PROGRESS);
             }
         }
-
     }
+
+    public void setEpicEndTime(Epic epic) {
+        Duration epicDuration = null;
+        LocalDateTime epicStartTime = null;
+        LocalDateTime epicEndTime = null;
+        if (epic.getSubtasksId() != null) {
+            for (Integer subtaskId : epic.getSubtasksId()) {
+                Subtask subtask = subtasks.get(subtaskId);
+                epicDuration = epicDuration.plus(subtask.getDuration());
+                if (subtask.getStartTime() != null) {
+                    if (epicStartTime == null || epicStartTime.isAfter(subtask.getStartTime())) {
+                        epicStartTime = subtask.getStartTime();
+                    }
+                    if (epicEndTime == null || epicEndTime.isBefore(subtask.getEndTime())) {
+                        epicEndTime = subtask.getEndTime();
+                    }
+                }
+            }
+        }
+        epic.setDuration(epicDuration);
+        epic.setStartTime(epicStartTime);
+        epic.setEndTime(epicEndTime);
+    }
+
 
     public static void main(String[] args) {
         TaskManager inMemoryTaskManager = Managers.getDefault();
-        Epic epic = new Epic("Хуй", "Пизда");
+        Epic epic = new Epic("Эпик1", "Описание1");
         inMemoryTaskManager.createEpic(epic);
-        Subtask subtask = new Subtask("Говно", "Моча", epic.getId());
+        Subtask subtask = new Subtask("Сабтаск1", "Описание2", epic.getId());
         inMemoryTaskManager.createSubtask(subtask);
     }
 }
