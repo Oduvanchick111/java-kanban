@@ -1,6 +1,7 @@
 package com.yandex.kanban.service;
 
 import com.yandex.kanban.Exceptions.ManagerSaveException;
+import com.yandex.kanban.Exceptions.ValidateException;
 import com.yandex.kanban.model.*;
 
 import java.io.*;
@@ -86,6 +87,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         } catch (IOException e) {
             throw new ManagerSaveException("");
+        } catch (ValidateException e) {
+            throw new RuntimeException(e);
         }
         return fileBackedTaskManager;
     }
@@ -109,19 +112,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
+    public void createTask(Task task) throws ValidateException {
         super.createTask(task);
         save();
     }
 
     @Override
-    public void createEpic(Epic epic) {
+    public void createEpic(Epic epic) throws ValidateException {
         super.createEpic(epic);
         save();
     }
 
     @Override
-    public void createSubtask(Subtask subtask) {
+    public void createSubtask(Subtask subtask) throws ValidateException {
         super.createSubtask(subtask);
         save();
     }
@@ -171,7 +174,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return builder.toString();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ValidateException {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new File("C:\\Users\\1\\Desktop\\1.txt"));
         Task firstTask = new Task("Таск1", "Описание1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
         fileBackedTaskManager.createTask(firstTask);

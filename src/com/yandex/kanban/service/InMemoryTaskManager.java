@@ -1,5 +1,6 @@
 package com.yandex.kanban.service;
 
+import com.yandex.kanban.Exceptions.ValidateException;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     private int countTasks = 1;
@@ -91,30 +93,43 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
+    public void createTask(Task task) throws ValidateException {
         if (task.getId() == 0) {
             task.setId(countTasks++);
         }
-        tasks.put(task.getId(), task);
+        if (isFreeTime(task)) {
+            tasks.put(task.getId(), task);
+        } else {
+            throw new ValidateException("Невозожно добавить задачу с данным временным промежутком");
+        }
+
     }
 
     @Override
-    public void createEpic(Epic epic) {
+    public void createEpic(Epic epic) throws ValidateException {
         if (epic.getId() == 0) {
             epic.setId(countTasks++);
         }
-        epics.put(epic.getId(), epic);
+        if (isFreeTime(epic)) {
+            tasks.put(epic.getId(), epic);
+        } else {
+            throw new ValidateException("Невозожно добавить задачу с данным временным промежутком");
+        }
     }
 
     @Override
-    public void createSubtask(Subtask subtask) {
+    public void createSubtask(Subtask subtask) throws ValidateException {
         if (subtask.getId() == 0) {
             subtask.setId(countTasks++);
         }
-        subtasks.put(subtask.getId(), subtask);
-        Epic epic = epics.get(subtask.getEpicId());
-        epic.getSubtasksId().add(subtask.getId());
-        updateEpicStatus(epic);
+        if (isFreeTime(subtask)) {
+            subtasks.put(subtask.getId(), subtask);
+            Epic epic = epics.get(subtask.getEpicId());
+            epic.getSubtasksId().add(subtask.getId());
+            updateEpicStatus(epic);
+        } else {
+            throw new ValidateException("Невозожно добавить задачу с данным временным промежутком");
+        }
     }
 
     @Override
@@ -168,12 +183,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Subtask> getSubtasks(Integer epicId) {
-        ArrayList<Subtask> subtasksValues = new ArrayList<>();
         ArrayList<Integer> subtasksId = epics.get(epicId).getSubtasksId();
-        for (Integer subtaskId : subtasksId) {
-            subtasksValues.add(subtasks.get(subtaskId));
-        }
-        return subtasksValues;
+        return (ArrayList<Subtask>) subtasksId.stream().map(subtaskId -> subtasks.get(subtaskId)).collect(Collectors.toList());
+
     }
 
     @Override
@@ -232,25 +244,41 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Set<Task> getPrioritizedTasks() {
-        for (Task task : getAllTasks()) {
-            if (task.getStartTime() != null) {
-                prioritizedTasks.add(task);
-            }
-        }
-        for (Epic epic : getAllEpics()) {
-            if (epic.getStartTime() != null) {
-                prioritizedTasks.add(epic);
-            }
-        }
-        for (Subtask subtask : getAllSubtasks()) {
-            if (subtask.getStartTime() != null) {
-                prioritizedTasks.add(subtask);
-            }
-        }
+        prioritizedTasks.clear();
+        ArrayList<Task> allTypeOfTasks = new ArrayList<>();
+        allTypeOfTasks.addAll(getAllTasks());
+        allTypeOfTasks.addAll(getAllEpics());
+        allTypeOfTasks.addAll(getAllSubtasks());
+        prioritizedTasks.addAll(allTypeOfTasks.stream().filter(task -> task.getStartTime() != null).collect(Collectors.toSet()));
         return prioritizedTasks;
     }
 
-    public static void main(String[] args) throws IOException {
+    public boolean isValidateTime(Task oldTask, Task newTask) {
+        LocalDateTime newTaskStartTime = newTask.getStartTime();
+        LocalDateTime newTaskEndTime = newTask.getEndTime();
+        LocalDateTime oldTaskStartTime = oldTask.getStartTime();
+        LocalDateTime oldTaskEndTime = oldTask.getEndTime();
+        if (newTaskStartTime == null) {
+            return true;
+        }
+        if (newTaskStartTime.isAfter(oldTaskStartTime) && newTaskStartTime.isBefore(oldTaskEndTime)) {
+            return false;
+        }
+        if (newTaskEndTime.isAfter(oldTaskStartTime) && newTaskEndTime.isBefore(oldTaskEndTime)) {
+            return false;
+        }
+        if (newTaskStartTime.isBefore(oldTaskStartTime) && newTaskEndTime.isAfter(oldTaskEndTime)) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isFreeTime(Task task) {
+        boolean isFreeTime = getPrioritizedTasks().stream().anyMatch(taskInList -> isValidateTime(taskInList, task));
+        return isFreeTime;
+    }
+
+    public static void main(String[] args) throws IOException, ValidateException {
         TaskManager inMemoryTaskManager = Managers.getDefault();
 //        Epic epic = new Epic("Эпик1", "Описание1");
 //        inMemoryTaskManager.createEpic(epic);

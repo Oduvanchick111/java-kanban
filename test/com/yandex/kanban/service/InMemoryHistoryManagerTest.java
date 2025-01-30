@@ -1,5 +1,6 @@
 package com.yandex.kanban.service;
 
+import com.yandex.kanban.Exceptions.ValidateException;
 import com.yandex.kanban.model.Task;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ class InMemoryHistoryManagerTest {
     InMemoryTaskManager taskManager = (InMemoryTaskManager) Managers.getDefault();
 
     @Test
-    void addHistory() {
+    void addHistory() throws ValidateException {
         Task task1 = new Task("Таск 1", "Поесть");
         taskManager.createTask(task1);
         taskManager.getTask(task1.getId());
@@ -32,7 +33,7 @@ class InMemoryHistoryManagerTest {
 
 
     @Test
-    void removeTasks() {
+    void removeTasks() throws ValidateException {
         Task task = new Task("Таск1", "Поспать");
         taskManager.createTask(task);
         taskManager.getTask(task.getId());
@@ -44,7 +45,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void checkUniqueness() {
+    void checkUniqueness() throws ValidateException {
         Task task1 = new Task("Таск1", "details1");
         Task task2 = new Task("Таск2", "details2");
         Task task3 = new Task("Таск3", "details3");

@@ -1,5 +1,6 @@
 package com.yandex.kanban.service;
 
+import com.yandex.kanban.Exceptions.ValidateException;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
@@ -29,11 +30,11 @@ public interface TaskManager {
 
     void removeAllEpics() throws IOException;
 
-    void createTask(Task task) throws IOException;
+    void createTask(Task task) throws IOException, ValidateException;
 
-    void createEpic(Epic epic);
+    void createEpic(Epic epic) throws ValidateException;
 
-    void createSubtask(Subtask subtask);
+    void createSubtask(Subtask subtask) throws ValidateException;
 
     void removeTaskById(int id);
 
