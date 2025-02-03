@@ -98,12 +98,12 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" +
-                "name='" + name + '\'' +
-                ", details='" + details + '\'' +
+                "name='" + name +
+                ", details='" + details +
                 ", status=" + status +
                 ", id=" + id +
-                ", startTime=" + (startTime != null ? startTime.format(formatter) : "null") +
-                ", duration=" + (duration != null ? duration.toMinutes() : "null") +
+                ", startTime=" + (startTime != null ? startTime.format(formatter) : null) +
+                ", duration=" + (duration != null ? duration.toMinutes() : null) +
                 '}';
     }
 

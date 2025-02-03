@@ -40,10 +40,12 @@ public class Epic extends Task {
     @Override
     public String toString() {
         return "Epic{" +
-                "title='" + getName() + '\'' +
-                ", description='" + getDetails() + '\'' +
+                "title='" + getName() +
+                ", description='" + getDetails() +
                 ", id=" + getId() +
                 ", status=" + getStatus() +
+                ", StartTime=" + (getStartTime() != null ? getStartTime().format(formatter) : null) +
+                ", duration=" + (getDuration() != null ? getDuration().toMinutes() : null) +
                 ", Id Сабтасков, входящих в данный эпик:" + subtasksId +
                 '}';
     }

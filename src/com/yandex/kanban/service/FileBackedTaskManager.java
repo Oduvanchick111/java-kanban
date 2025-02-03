@@ -63,8 +63,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Type type = Type.valueOf(partOfTask[1]);
                 String name = partOfTask[2];
                 String description = partOfTask[4];
-                LocalDateTime startTime = LocalDateTime.parse(partOfTask[5], formatter);
-                Duration duration = Duration.ofMinutes(Integer.valueOf(partOfTask[6]));
+                LocalDateTime startTime;
+                if (!partOfTask[5].equals("null")) {
+                    startTime = LocalDateTime.parse(partOfTask[5], formatter);
+                } else {
+                    startTime = null;
+                }
+                Duration duration;
+                if (!partOfTask[6].equals("null")) {
+                    duration = Duration.ofMinutes(Integer.parseInt(partOfTask[6]));
+                } else {
+                    duration = null;
+                }
                 Status status = Status.valueOf(partOfTask[3]);
                 switch (type) {
                     case TASK:
@@ -78,7 +88,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         fileBackedTaskManager.createEpic(epic);
                         break;
                     case SUBTASK:
-                        Subtask subtask = new Subtask(name, description, status, startTime, duration, Integer.parseInt(partOfTask[5]));
+                        Subtask subtask = new Subtask(name, description, status, startTime, duration, Integer.parseInt(partOfTask[7]));
                         subtask.setId(id);
                         fileBackedTaskManager.createSubtask(subtask);
                         break;
@@ -167,7 +177,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public String toString(Task task) {
         StringBuilder builder = new StringBuilder();
-        builder.append(task.getId()).append(",").append(task.getType()).append(",").append(task.getName()).append(",").append(task.getStatus()).append(",").append(task.getDetails()).append(",").append(task.getStartTime().format(formatter)).append(",").append(task.getDuration().toMinutes()).append(",");
+        builder.append(task.getId()).append(",").append(task.getType()).append(",").append(task.getName()).append(",").append(task.getStatus()).append(",").append(task.getDetails()).append(",").append(task.getStartTime() != null ? task.getStartTime().format(formatter): null).append(",").append(task.getDuration() != null ? task.getDuration().toMinutes() : null).append(",");
         if (task instanceof Subtask) {
             builder.append(((Subtask) task).getEpicId());
         }
@@ -176,9 +186,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static void main(String[] args) throws ValidateException {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new File("C:\\Users\\1\\Desktop\\1.txt"));
-        Task firstTask = new Task("Таск1", "Описание1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
-        fileBackedTaskManager.createTask(firstTask);
-        fileBackedTaskManager.save();
+        Epic epic = new Epic("Эпик1", "Описание1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(20));
+        fileBackedTaskManager.createEpic(epic);
+        Epic epic1 = new Epic("Эпик2", "Описание2");
+        fileBackedTaskManager.createEpic(epic1);
+        Subtask subtask = new Subtask("Сабтаск1", "Описание1", Status.NEW, LocalDateTime.of(2025, 9, 23, 14, 0), Duration.ofMinutes(20), epic1.getId());
+        fileBackedTaskManager.createSubtask(subtask);
+//        System.out.println(epic);
+//        System.out.println(epic1);
+//        FileBackedTaskManager fileBackedTaskManager1 = FileBackedTaskManager.loadFromFile(new File("C:\\Users\\1\\Desktop\\1.txt"));
+//        System.out.println(fileBackedTaskManager1.getEpic(epic1.getId()));
+//        System.out.println(fileBackedTaskManager1.getEpic(epic.getId()));
+//        System.out.println(fileBackedTaskManager1.getEpic(epic1.getId()));
+//        Task firstTask = new Task("Таск1", "Описание1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(30));
+//        fileBackedTaskManager.createTask(firstTask);
+//        fileBackedTaskManager.save();
 //        fileBackedTaskManager.createTask(firstTask);
 //        Task secondTask = new Task("Таск2", "Описание11");
 //        fileBackedTaskManager.createTask(secondTask);
@@ -188,8 +210,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 //        fileBackedTaskManager.createSubtask(subtask);
 //        Task task2 = new Task("Таск3", "Описание111");
 //        fileBackedTaskManager.createTask(task2);
-        FileBackedTaskManager fileBackedTaskManager1 = FileBackedTaskManager.loadFromFile(new File("C:\\Users\\1\\Desktop\\1.txt"));
-        System.out.println(fileBackedTaskManager1.getAllTasks());
+//        FileBackedTaskManager fileBackedTaskManager1 = FileBackedTaskManager.loadFromFile(new File("C:\\Users\\1\\Desktop\\1.txt"));
+//        System.out.println(fileBackedTaskManager1.getAllTasks());
+//        System.out.println(fileBackedTaskManager1.getAllTasks().get(0).getStartTime());
 //        System.out.println(fileBackedTaskManager1.getAllEpics());
     }
 }
