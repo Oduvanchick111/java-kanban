@@ -30,11 +30,11 @@ public interface TaskManager {
 
     void removeAllEpics() throws IOException;
 
-    void createTask(Task task) throws IOException, ValidateException;
+    void createTask(Task task) throws IOException;
 
-    void createEpic(Epic epic) throws ValidateException;
+    void createEpic(Epic epic);
 
-    void createSubtask(Subtask subtask) throws ValidateException;
+    void createSubtask(Subtask subtask);
 
     void removeTaskById(int id);
 
