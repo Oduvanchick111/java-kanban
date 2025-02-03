@@ -8,8 +8,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TaskTest {
     TaskManager inMemoryTaskManager = Managers.getDefault();
+
     @Test
-    void checkEpicStatusAllSubtasksNew(){
+    void checkEpicStatusAllSubtasksNew() {
         Epic epic = new Epic("Epic1", "Описание1");
         inMemoryTaskManager.createEpic(epic);
         Subtask subtask1 = new Subtask("Сабтаск1", "Описание1", Status.NEW, epic.getId());
@@ -20,7 +21,7 @@ class TaskTest {
     }
 
     @Test
-    void checkEpicStatusAllSubtasksDone(){
+    void checkEpicStatusAllSubtasksDone() {
         Epic epic = new Epic("Epic1", "Описание1");
         inMemoryTaskManager.createEpic(epic);
         Subtask subtask1 = new Subtask("Сабтаск1", "Описание1", Status.DONE, epic.getId());
