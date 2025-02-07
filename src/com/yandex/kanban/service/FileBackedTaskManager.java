@@ -14,7 +14,7 @@ import static com.yandex.kanban.model.Task.formatter;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    final String HEADER = "id,type,name,status,description,startTime,duration,epic";
+    public static final String HEADER = "id,type,name,status,description,startTime,duration,epic";
 
     private File file;
 
