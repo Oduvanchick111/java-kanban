@@ -102,15 +102,15 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "name='" + name +
-                ", details='" + details +
-                ", status=" + status +
-                ", id=" + id +
-                ", startTime=" + (startTime != null ? startTime.format(formatter) : null) +
-                ", duration=" + (duration != null ? duration.toMinutes() : null) +
-                '}';
+        return String.format("Task{name='%s', details='%s', status=%s, id=%d, startTime=%s, duration=%s}",
+                name,
+                details,
+                status,
+                id,
+                (startTime != null ? startTime.format(formatter) : "null"),
+                (duration != null ? duration.toMinutes() : "null"));
     }
+
 
     @Override
     public boolean equals(Object o) {
