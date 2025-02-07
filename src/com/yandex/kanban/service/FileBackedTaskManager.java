@@ -14,6 +14,7 @@ import static com.yandex.kanban.model.Task.formatter;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
+    final String HEADER = "id,type,name,status,description,startTime,duration,epic";
 
     private File file;
 
@@ -31,8 +32,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public void save() throws ManagerSaveException {
         try (Writer writer = new FileWriter(file)) {
-            final String header = "id,type,name,status,description,startTime,duration,epic";
-            writer.write(header);
+            writer.write(HEADER);
             writer.write(System.lineSeparator());
             for (Task task : getAllTasks()) {
                 writer.write(toString(task));
@@ -64,13 +64,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 String name = partOfTask[2];
                 String description = partOfTask[4];
                 LocalDateTime startTime;
-                if (!partOfTask[5].equals("null")) {
+                if (!partOfTask[5].isEmpty()) {
                     startTime = LocalDateTime.parse(partOfTask[5], formatter);
                 } else {
                     startTime = null;
                 }
                 Duration duration;
-                if (!partOfTask[6].equals("null")) {
+                if (!partOfTask[6].isEmpty()) {
                     duration = Duration.ofMinutes(Integer.parseInt(partOfTask[6]));
                 } else {
                     duration = null;
@@ -94,9 +94,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         break;
                 }
             }
-
         } catch (IOException e) {
-            throw new ManagerSaveException("");
+            throw new ManagerSaveException("Не удалось сохранить данные в файл");
         } catch (ValidateException e) {
             throw new RuntimeException(e);
         }

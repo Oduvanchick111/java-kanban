@@ -104,7 +104,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (isFreeTime(task)) {
                 prioritizedTasks.add(task);
             } else {
-                throw new ValidateException("Невозожно добавить задачу с данным временным промежутком");
+                throw new ValidateException("Невозможно добавить задачу с данным временным промежутком");
             }
         }
     }
@@ -131,7 +131,7 @@ public class InMemoryTaskManager implements TaskManager {
                 setEpicEndTime(epic);
                 prioritizedTasks.add(subtask);
             } else {
-                throw new ValidateException("Невозожно добавить задачу с данным временным промежутком");
+                throw new ValidateException("Невозможно добавить задачу с данным временным промежутком");
             }
         }
     }
@@ -284,10 +284,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     public static void main(String[] args) throws IOException {
         TaskManager inMemoryTaskManager = Managers.getDefault();
-//        Epic epic = new Epic("Эпик1", "Описание1");
-//        inMemoryTaskManager.createEpic(epic);
-//        Subtask subtask = new Subtask("Сабтаск1", "Описание2", epic.getId());
-//        inMemoryTaskManager.createSubtask(subtask);
         Task task4 = new Task("Таск4", "Описание4");
         Task task = new Task("Таск1", "Описание1", Status.NEW, LocalDateTime.of(2008, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
         Task task1 = new Task("Таск2", "Описание1", Status.NEW, LocalDateTime.of(2005, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
@@ -309,9 +305,6 @@ public class InMemoryTaskManager implements TaskManager {
         System.out.println(start.format(formatter));
         System.out.println(end.format(formatter));
         System.out.println(epic.getDuration().toMinutes());
-
-
-//        System.out.println(inMemoryTaskManager.getPrioritizedTasks());
     }
 }
 
