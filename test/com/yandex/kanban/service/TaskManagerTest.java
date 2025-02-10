@@ -1,6 +1,6 @@
 package com.yandex.kanban.service;
 
-import com.yandex.kanban.Exceptions.ValidateException;
+import com.yandex.kanban.exceptions.ValidateException;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;

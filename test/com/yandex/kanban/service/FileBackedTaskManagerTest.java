@@ -1,6 +1,6 @@
 package com.yandex.kanban.service;
 
-import com.yandex.kanban.Exceptions.ValidateException;
+import com.yandex.kanban.exceptions.ValidateException;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

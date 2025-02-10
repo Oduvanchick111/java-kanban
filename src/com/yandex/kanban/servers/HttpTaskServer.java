@@ -1,4 +1,4 @@
-package com.yandex.kanban.Servers;
+package com.yandex.kanban.servers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,7 +28,7 @@ public class HttpTaskServer {
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         this.taskManager = taskManager;
         gson = HttpTaskServer.getGson();
-        server.createContext("/task", this::handleTask);
+        server.createContext("/", this::mainHandle);
     }
 
     public static Gson getGson() {
@@ -37,9 +37,9 @@ public class HttpTaskServer {
     }
 
     private void mainHandle(HttpExchange exchange) throws IOException {
-        try (exchange) {
-            System.out.println("\n/tasks: " + exchange.getRequestURI());
-            String path = exchange.getRequestURI().getPath().substring(6);
+        try {
+            System.out.println(exchange.getRequestURI());
+            String path = exchange.getRequestURI().getPath();
             switch (path) {
                 case "/prioritized":
                     prioritizedHandle(exchange);
@@ -48,7 +48,9 @@ public class HttpTaskServer {
                     handleTask(exchange);
                     break;
             }
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeResponse(exchange, "Ошибка, такого запроса не существует", 404);
         }
     }
 
@@ -61,7 +63,7 @@ public class HttpTaskServer {
         Task task;
         switch (method) {
             case "GET":
-                if (query == null) {
+                if (query.isEmpty()) {
                     final List<Task> tasks = taskManager.getAllTasks();
                     response = gson.toJson(tasks);
                     System.out.println("Был запрос на получение всех задач");
@@ -69,7 +71,8 @@ public class HttpTaskServer {
                     return;
                 }
                 idText = query.substring(3);
-                id = Integer.parseInt(idText);
+                String[] splitQuery = query.split("=");
+                id = Integer.parseInt(splitQuery[1]);
                 task = taskManager.getTask(id);
                 response = gson.toJson(task);
                 System.out.println("Был запрос на получений задачи c id: " + id);
@@ -79,14 +82,14 @@ public class HttpTaskServer {
                 if (query == null) {
                     taskManager.removeAllTasks();
                     System.out.println("Был запрос на удаление всех задач");
-                    exchange.sendResponseHeaders(201, 0);
+                    writeResponse(exchange, "были удалены все задачи", 201);
                     return;
                 }
                 idText = query.substring(3);
                 id = Integer.parseInt(idText);
                 taskManager.removeTaskById(id);
                 System.out.println("Удалили задачу с id: " + id);
-                exchange.sendResponseHeaders(201, 0);
+                writeResponse(exchange, "Удалили задачу с id: " + id, 201);
                 break;
         }
     }
@@ -95,7 +98,8 @@ public class HttpTaskServer {
         String method = exchange.getRequestMethod();
         if (!method.equals("GET")) {
             System.out.println("Введен неверный HTTP-метод");
-            exchange.sendResponseHeaders(405,0);
+            writeResponse(exchange, "Введен неверный HTTP-метод", 405);
+            return;
         }
         final String response = gson.toJson(taskManager.getPrioritizedTasks());
         writeResponse(exchange, response, 200);
@@ -108,7 +112,6 @@ public class HttpTaskServer {
             exchange.sendResponseHeaders(responseCode, 0);
             os.write(responseString.getBytes(DEFAULT_CHARSET));
         }
-        exchange.close();
     }
 
     public void start() {
@@ -133,5 +136,7 @@ public class HttpTaskServer {
 //        httpTaskServer.stop(10);
     }
 }
+
+
 
 
