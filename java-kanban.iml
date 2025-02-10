@@ -50,5 +50,21 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="JUnit5.8.1">
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/junit-jupiter-5.8.1.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/junit-jupiter-api-5.8.1.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/opentest4j-1.2.0.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/junit-platform-commons-1.8.1.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/apiguardian-api-1.1.2.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/junit-jupiter-params-5.8.1.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/junit-jupiter-engine-5.8.1.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/m1-t23-junit/junit-platform-engine-1.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

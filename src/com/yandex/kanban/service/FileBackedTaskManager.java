@@ -1,12 +1,20 @@
 package com.yandex.kanban.service;
 
 import com.yandex.kanban.Exceptions.ManagerSaveException;
+import com.yandex.kanban.Exceptions.ValidateException;
 import com.yandex.kanban.model.*;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+
+import static com.yandex.kanban.model.Task.formatter;
 
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
+
+    public static final String HEADER = "id,type,name,status,description,startTime,duration,epic";
 
     private File file;
 
@@ -24,8 +32,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public void save() throws ManagerSaveException {
         try (Writer writer = new FileWriter(file)) {
-            final String header = "id,type,name,status,description,epic";
-            writer.write(header);
+            writer.write(HEADER);
             writer.write(System.lineSeparator());
             for (Task task : getAllTasks()) {
                 writer.write(toString(task));
@@ -56,28 +63,41 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Type type = Type.valueOf(partOfTask[1]);
                 String name = partOfTask[2];
                 String description = partOfTask[4];
+                LocalDateTime startTime;
+                if (!partOfTask[5].isEmpty()) {
+                    startTime = LocalDateTime.parse(partOfTask[5], formatter);
+                } else {
+                    startTime = null;
+                }
+                Duration duration;
+                if (!partOfTask[6].isEmpty()) {
+                    duration = Duration.ofMinutes(Integer.parseInt(partOfTask[6]));
+                } else {
+                    duration = null;
+                }
                 Status status = Status.valueOf(partOfTask[3]);
                 switch (type) {
                     case TASK:
-                        Task task = new Task(name, description, status);
+                        Task task = new Task(name, description, status, startTime, duration);
                         task.setId(id);
                         fileBackedTaskManager.createTask(task);
                         break;
                     case EPIC:
-                        Epic epic = new Epic(name, description, status);
+                        Epic epic = new Epic(name, description, status, startTime, duration);
                         epic.setId(id);
                         fileBackedTaskManager.createEpic(epic);
                         break;
                     case SUBTASK:
-                        Subtask subtask = new Subtask(name, description, status, Integer.parseInt(partOfTask[5]));
+                        Subtask subtask = new Subtask(name, description, status, startTime, duration, Integer.parseInt(partOfTask[7]));
                         subtask.setId(id);
                         fileBackedTaskManager.createSubtask(subtask);
                         break;
                 }
             }
-
         } catch (IOException e) {
-            throw new ManagerSaveException("");
+            throw new ManagerSaveException("Не удалось сохранить данные в файл");
+        } catch (ValidateException e) {
+            throw new RuntimeException(e);
         }
         return fileBackedTaskManager;
     }
@@ -101,19 +121,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
+    public void createTask(Task task) throws ValidateException {
         super.createTask(task);
         save();
     }
 
     @Override
-    public void createEpic(Epic epic) {
+    public void createEpic(Epic epic) throws ValidateException {
         super.createEpic(epic);
         save();
     }
 
     @Override
-    public void createSubtask(Subtask subtask) {
+    public void createSubtask(Subtask subtask) throws ValidateException {
         super.createSubtask(subtask);
         save();
     }
@@ -156,27 +176,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public String toString(Task task) {
         StringBuilder builder = new StringBuilder();
-        builder.append(task.getId()).append(",").append(task.getType()).append(",").append(task.getName()).append(",").append(task.getStatus()).append(",").append(task.getDetails()).append(",");
+        builder.append(task.getId()).append(",").append(task.getType()).append(",").append(task.getName()).append(",").append(task.getStatus()).append(",").append(task.getDetails()).append(",").append(task.getStartTime() != null ? task.getStartTime().format(formatter) : null).append(",").append(task.getDuration() != null ? task.getDuration().toMinutes() : null).append(",");
         if (task instanceof Subtask) {
             builder.append(((Subtask) task).getEpicId());
         }
         return builder.toString();
     }
 
-    public static void main(String[] args) {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new File("C:\\Users\\liza1\\OneDrive\\Рабочий стол\\2.txt"));
-        Task firstTask = new Task("Таск1", "Описание1");
-        fileBackedTaskManager.createTask(firstTask);
-        Task secondTask = new Task("Таск2", "Описание11");
-        fileBackedTaskManager.createTask(secondTask);
-        Epic epic = new Epic("Эпик1", "Описание2");
+    public static void main(String[] args) throws ValidateException {
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new File("C:\\Users\\1\\Desktop\\1.txt"));
+        Epic epic = new Epic("Эпик1", "Описание1", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(20));
         fileBackedTaskManager.createEpic(epic);
-        Subtask subtask = new Subtask("Сабатск1", "Описание 3", epic.getId());
+        Epic epic1 = new Epic("Эпик2", "Описание2");
+        fileBackedTaskManager.createEpic(epic1);
+        Subtask subtask = new Subtask("Сабтаск1", "Описание1", Status.NEW, LocalDateTime.of(2025, 9, 23, 14, 0), Duration.ofMinutes(20), epic1.getId());
         fileBackedTaskManager.createSubtask(subtask);
-        Task task2 = new Task("Таск3", "Описание111");
-        fileBackedTaskManager.createTask(task2);
-        FileBackedTaskManager fileBackedTaskManager1 = FileBackedTaskManager.loadFromFile(new File("C:\\Users\\liza1\\OneDrive\\Рабочий стол\\2.txt"));
-        System.out.println(fileBackedTaskManager1.getAllTasks());
-        System.out.println(fileBackedTaskManager1.getAllEpics());
+
     }
 }
