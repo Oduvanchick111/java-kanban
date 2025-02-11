@@ -305,6 +305,7 @@ public class InMemoryTaskManager implements TaskManager {
         System.out.println(start.format(formatter));
         System.out.println(end.format(formatter));
         System.out.println(epic.getDuration().toMinutes());
+        Task task3 = new Task("хуй", "пизда");
     }
 }
 
