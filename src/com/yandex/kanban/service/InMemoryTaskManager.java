@@ -114,6 +114,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic.getId() == 0) {
             epic.setId(countTasks++);
         }
+        if (epic.getStatus() == null) {
+            epic.setStatus(Status.NEW);
+        }
         epics.put(epic.getId(), epic);
     }
 
@@ -192,7 +195,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Subtask> getSubtasks(Integer epicId) {
-        ArrayList<Integer> subtasksId = epics.get(epicId).getSubtasksId();
+        List<Integer> subtasksId = epics.get(epicId).getSubtasksId();
         return (ArrayList<Subtask>) subtasksId.stream().map(subtasks::get).collect(Collectors.toList());
     }
 
@@ -208,7 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
             boolean allDone = true;
             boolean allNew = true;
             for (Integer subtaskId : epic.getSubtasksId()) {
-                Status subtaskStatus = subtasks.get(subtaskId).getStatus();
+                Status  subtaskStatus = subtasks.get(subtaskId).getStatus();
                 if (subtaskStatus != Status.DONE) {
                     allDone = false;
                 }
@@ -275,7 +278,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (newTaskStartTime.isBefore(oldTaskStartTime) && newTaskEndTime.isAfter(oldTaskEndTime)) {
             return false;
         }
-        return true;
+        return !newTaskStartTime.isEqual(oldTaskStartTime);
     }
 
     public boolean isFreeTime(Task task) {

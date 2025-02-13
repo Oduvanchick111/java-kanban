@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import com.yandex.kanban.exceptions.NotFoundException;
 import com.yandex.kanban.exceptions.ValidateException;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Subtask;
@@ -53,7 +54,7 @@ public class HttpTaskServer {
                 handleTask(exchange);
             } else if (path.matches("/subtasks(/\\d+)?")) {
                 subtaskHandle(exchange);
-            } else if (path.matches("/epics(/\\d+)/subtasks?") || path.equals("/epics")) {
+            } else if (path.matches("/epics(/\\d+)?") || path.matches("/epics(/\\d+)/(subtasks)")) {
                 epicHandle(exchange);
             } else {
                 switch (path) {
@@ -90,11 +91,16 @@ public class HttpTaskServer {
                     writeResponse(exchange, response, 200);
                     return;
                 } else if (splitPath.length == 3) {
-                    id = Integer.parseInt(splitPath[2]);
-                    task = taskManager.getTask(id);
-                    response = gson.toJson(task);
-                    System.out.println("Был запрос на получений задачи c id: " + id);
-                    writeResponse(exchange, response, 200);
+                    try {
+                        id = Integer.parseInt(splitPath[2]);
+                        task = taskManager.getTask(id);
+                        response = gson.toJson(task);
+                        System.out.println("Был запрос на получений задачи c id: " + id);
+                        writeResponse(exchange, response, 200);
+                    } catch (NotFoundException e) {
+                        writeResponse(exchange, "Задачи с таким id не существует", 404);
+                    }
+
                 }
                 break;
 
@@ -104,10 +110,14 @@ public class HttpTaskServer {
                     System.out.println("Был запрос на удаление всех задач");
                     writeResponse(exchange, "были удалены все задачи", 201);
                 } else {
-                    id = Integer.parseInt(splitPath[2]);
-                    taskManager.removeTaskById(id);
-                    System.out.println("Удалили задачу с id: " + id);
-                    writeResponse(exchange, "Удалили задачу с id: " + id, 201);
+                    try {
+                        id = Integer.parseInt(splitPath[2]);
+                        taskManager.removeTaskById(id);
+                        System.out.println("Удалили задачу с id: " + id);
+                        writeResponse(exchange, "Удалили задачу с id: " + id, 201);
+                    } catch (NotFoundException e) {
+                        writeResponse(exchange, "Задачи с таким id не существует", 404);
+                    }
                 }
                 break;
 
@@ -127,14 +137,15 @@ public class HttpTaskServer {
                         writeResponse(exchange, "Задача обновлена", 201);
                     } else {
                         taskManager.createTask(task);
-                        System.out.println("Был запрос на создании задачи");
-                        System.out.println(task.getId());
+                        System.out.println("Был запрос на создание задачи");
                         writeResponse(exchange, "Задача добавлена", 201);
                     }
                 } catch (JsonSyntaxException e) {
                     System.out.println("JsonSyntaxException");
+                    writeResponse(exchange, "Не удалось преобразовать объект Json", 406);
                 } catch (ValidateException e) {
                     System.out.println("ValidateException");
+                    writeResponse(exchange, "Данная задача пересекается с предыдущей", 406);
                 }
                 break;
         }
@@ -146,30 +157,40 @@ public class HttpTaskServer {
         String[] splitPath = path.split("/");
         String response = "";
         int id;
-        Epic epic;
-        String[] splitQuery;
         switch (method) {
             case "GET":
                 if (splitPath.length == 2) {
+                    System.out.println("Длинна массива с данными сплитпаф = " + splitPath.length);
                     final List<Epic> tasks = taskManager.getAllEpics();
                     response = gson.toJson(tasks);
                     System.out.println("Был запрос на получение всех задач");
                     writeResponse(exchange, response, 200);
                 } else if (splitPath.length == 3) {
-                    id = Integer.parseInt(splitPath[1]);
-                    epic = taskManager.getEpic(id);
-                    response = gson.toJson(epic);
-                    System.out.println("Был запрос на получений задачи c id: " + id);
-                    writeResponse(exchange, response, 200);
-                } else if (splitPath.length == 4) {
-                    id = Integer.parseInt(splitPath[1]);
-                    epic = taskManager.getEpic(id);
-                    ArrayList<Subtask> subtasks = new ArrayList<>();
-                    for (Integer subtaskId : epic.getSubtasksId()) {
-                        subtasks.add(taskManager.getSubtask(subtaskId));
+                    try {
+                        System.out.println("Длинна массива с данными сплитпаф = " + splitPath.length);
+                        id = Integer.parseInt(splitPath[2]);
+                        Epic epic = taskManager.getEpic(id);
+                        response = gson.toJson(epic);
+                        System.out.println("Был запрос на получений задачи c id: " + id);
+                        writeResponse(exchange, response, 200);
+                    } catch (NotFoundException e) {
+                        writeResponse(exchange, "Задачи с таким id не существует", 404);
                     }
-                    response = subtasks.toString();
-                    writeResponse(exchange, response, 200);
+
+                } else if (splitPath.length == 4) {
+                    try {
+                        System.out.println("Длинна массива с данными сплитпаф = " + splitPath.length);
+                        id = Integer.parseInt(splitPath[2]);
+                        Epic epic = taskManager.getEpic(id);
+                        ArrayList<Subtask> subtasks = new ArrayList<>();
+                        for (Integer subtaskId : epic.getSubtasksId()) {
+                            subtasks.add(taskManager.getSubtask(subtaskId));
+                            response = subtasks.toString();
+                            writeResponse(exchange, response, 200);
+                        }
+                    } catch (NotFoundException e) {
+                        writeResponse(exchange, "Задачи с таким id не существует", 404);
+                    }
                 }
                 break;
 
@@ -179,10 +200,14 @@ public class HttpTaskServer {
                     System.out.println("Был запрос на удаление всех задач");
                     writeResponse(exchange, "были удалены все задачи", 201);
                 } else {
-                    id = Integer.parseInt(splitPath[2]);
-                    taskManager.removeEpicById(id);
-                    System.out.println("Удалили задачу с id: " + id);
-                    writeResponse(exchange, "Удалили задачу с id: " + id, 201);
+                    try {
+                        id = Integer.parseInt(splitPath[2]);
+                        taskManager.removeEpicById(id);
+                        System.out.println("Удалили задачу с id: " + id);
+                        writeResponse(exchange, "Удалили задачу с id: " + id, 201);
+                    } catch (NotFoundException e) {
+                        writeResponse(exchange, "Задачи с таким id не существует", 404);
+                    }
                 }
                 break;
 
@@ -193,24 +218,25 @@ public class HttpTaskServer {
                     writeResponse(exchange, "Передано пустое тело запроса", 400);
                     return;
                 }
-                epic = gson.fromJson(json, Epic.class);
-                id = epic.getId();
-                if (id != 0) {
-                    taskManager.updateTask(epic);
-                    System.out.println("Был запрос на обновление задачи");
-                    writeResponse(exchange, "Задача обновлена", 201);
-                } else {
-                    try {
-                        taskManager.createTask(epic);
-                        System.out.println("Был запрос на создании задачи");
+                try {
+                    Epic epic = gson.fromJson(json, Epic.class);
+                    id = epic.getId();
+                    if (id != 0) {
+                        taskManager.updateEpic(epic);
+                        System.out.println("Был запрос на обновление задачи");
+                        writeResponse(exchange, "Задача обновлена", 201);
+                    } else {
+                        taskManager.createEpic(epic);
                         writeResponse(exchange, "Задача добавлена", 201);
-                    } catch (ValidateException e) {
-                        System.out.println("Был пойман Validate Exception");
-                        writeResponse(exchange, "Невозможно добавить задачу в заданный временной промежуток", 406);
                     }
+                } catch (JsonSyntaxException e) {
+                    System.out.println("JsonSyntaxException");
+                    writeResponse(exchange, "Не удалось преобразовать объект Json", 406);
+                } catch (ValidateException e) {
+                    System.out.println("ValidateException");
+                    writeResponse(exchange, "Данная задача пересекается с предыдущей", 406);
                 }
                 break;
-
         }
     }
 
@@ -229,11 +255,16 @@ public class HttpTaskServer {
                     System.out.println("Был запрос на получение всех задач");
                     writeResponse(exchange, response, 200);
                 } else {
-                    id = Integer.parseInt(splitPath[2]);
-                    subtask = taskManager.getSubtask(id);
-                    response = gson.toJson(subtask);
-                    System.out.println("Был запрос на получений задачи c id: " + id);
-                    writeResponse(exchange, response, 200);
+                    try {
+                        id = Integer.parseInt(splitPath[2]);
+                        subtask = taskManager.getSubtask(id);
+                        response = gson.toJson(subtask);
+                        System.out.println("Был запрос на получений задачи c id: " + id);
+                        writeResponse(exchange, response, 200);
+                    } catch (NotFoundException e) {
+                        writeResponse(exchange, "Задачи с таким id не существует", 404);
+                    }
+
                 }
                 break;
 
@@ -243,10 +274,14 @@ public class HttpTaskServer {
                     System.out.println("Был запрос на удаление всех задач");
                     writeResponse(exchange, "были удалены все задачи", 201);
                 } else {
-                    id = Integer.parseInt(splitPath[2]);
-                    taskManager.removeSubtaskById(id);
-                    System.out.println("Удалили задачу с id: " + id);
-                    writeResponse(exchange, "Удалили задачу с id: " + id, 201);
+                    try {
+                        id = Integer.parseInt(splitPath[2]);
+                        taskManager.removeSubtaskById(id);
+                        System.out.println("Удалили задачу с id: " + id);
+                        writeResponse(exchange, "Удалили задачу с id: " + id, 201);
+                    } catch (NotFoundException e) {
+                        writeResponse(exchange, "Задачи с таким id не существует", 404);
+                    }
                 }
                 break;
 
@@ -257,21 +292,24 @@ public class HttpTaskServer {
                     writeResponse(exchange, "Передано пустое тело запроса", 400);
                     return;
                 }
-                subtask = gson.fromJson(json, Subtask.class);
-                id = subtask.getId();
-                if (id != 0) {
-                    taskManager.updateTask(subtask);
-                    System.out.println("Был запрос на обновление задачи");
-                    writeResponse(exchange, "Задача обновлена", 201);
-                } else {
-                    try {
-                        taskManager.createTask(subtask);
-                        System.out.println("Был запрос на создании задачи");
+                try {
+                    subtask = gson.fromJson(json, Subtask.class);
+                    id = subtask.getId();
+                    if (id != 0) {
+                        taskManager.updateSubtask(subtask);
+                        System.out.println("Был запрос на обновление задачи");
+                        writeResponse(exchange, "Задача обновлена", 201);
+                    } else {
+                        taskManager.createSubtask(subtask);
+                        System.out.println("Был запрос на создание задачи");
                         writeResponse(exchange, "Задача добавлена", 201);
-                    } catch (ValidateException e) {
-                        System.out.println("Был пойман Validate Exception");
-                        writeResponse(exchange, "Невозможно добавить задачу в заданный временной промежуток", 406);
                     }
+                } catch (JsonSyntaxException e) {
+                    System.out.println("JsonSyntaxException");
+                    writeResponse(exchange, "Не удалось преобразовать объект Json", 406);
+                } catch (ValidateException e) {
+                    System.out.println("ValidateException");
+                    writeResponse(exchange, "Данная задача пересекается с предыдущей", 406);
                 }
                 break;
         }
@@ -291,8 +329,9 @@ public class HttpTaskServer {
     private void prioritizedHandle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         if (!method.equals("GET")) {
-            System.out.println("Такого эндпоинта не существует");
-            writeResponse(exchange, "Такого эндпоинта не существует", 405);
+            String request = "Такого эндпоинта не существует";
+            System.out.println(request);
+            writeResponse(exchange, request, 405);
             return;
         }
         final String response = gson.toJson(taskManager.getPrioritizedTasks());
@@ -310,13 +349,12 @@ public class HttpTaskServer {
 
     public void start() {
         System.out.println("Запускаем сервер на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
         server.start();
     }
 
-    public void stop(int time) {
+    public void stop() {
         System.out.println("Останавливаем работу сервера на порту: " + PORT);
-        server.stop(time);
+        server.stop(0);
     }
 
     protected String readText(HttpExchange h) throws IOException {
@@ -327,9 +365,23 @@ public class HttpTaskServer {
     public static void main(String[] args) throws IOException {
         HttpTaskServer httpTaskServer = new HttpTaskServer(Managers.getDefault());
         httpTaskServer.start();
+//        Epic epic = new Epic("Эпик1", "Описание1");
+//        httpTaskServer.taskManager.createEpic(epic);
+//        System.out.println(epic.getSubtasksId());
 
-
+//        Task task = new Task("Таск1", "Описание1" , Status.NEW, LocalDateTime.of(2025, 9, 23, 14, 0), Duration.ofMinutes(60));
+//        Task task1 = new Task("Таск2", "Описание2" , Status.NEW, LocalDateTime.of(2022, 9, 23, 14, 20), Duration.ofMinutes(60));
+//        httpTaskServer.taskManager.createTask(task);
+//        httpTaskServer.taskManager.createTask(task1);
+//        System.out.println(httpTaskServer.taskManager.getPrioritizedTasks());
 //        httpTaskServer.stop(1);
+//        Epic epic1 = new Epic("Эпик1", "Описание1" , Status.NEW, LocalDateTime.of(2025, 9, 23, 14, 0), Duration.ofMinutes(60));
+//        Epic epic2 = new Epic("Эпик2", "Описание2" , Status.NEW, LocalDateTime.of(2025, 10, 23, 14, 0), Duration.ofMinutes(60));
+//        httpTaskServer.taskManager.createEpic(epic1);
+//        httpTaskServer.taskManager.createEpic(epic2);
+//        Subtask subtask = new Subtask("Сабтаск1", "Описание3" , Status.NEW, LocalDateTime.of(2025, 11, 23, 14, 0), Duration.ofMinutes(60), 1);
+//        httpTaskServer.taskManager.createSubtask(subtask);
+//        System.out.println(subtask);
     }
 }
 
