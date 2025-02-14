@@ -1,17 +1,16 @@
 package com.yandex.kanban.server;
 
 import com.google.gson.Gson;
+import com.yandex.kanban.exceptions.ValidateException;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.servers.HttpTaskServer;
+import com.yandex.kanban.servers.TasksListTypeToken;
 import com.yandex.kanban.service.InMemoryTaskManager;
-import com.yandex.kanban.service.Managers;
 import com.yandex.kanban.service.TaskManager;
-import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HttpTaskServerTest {
 
@@ -113,21 +111,118 @@ public class HttpTaskServerTest {
     @Test
     public void getTaskTest() throws IOException, InterruptedException {
         Task task = new Task("Таск1", "Описание");
-        String taskJson = gson.toJson(task);
+        manager.createTask(task);
         HttpClient client = HttpClient.newHttpClient();
-        URI urlTask = URI.create("http://localhost:8080/tasks");
         URI urlGetTaskId = URI.create("http://localhost:8080/tasks/1");
-        HttpRequest addRequest = HttpRequest.newBuilder()
-                .uri(urlTask)
-                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
-                .build();
+
         HttpRequest getRequest = HttpRequest.newBuilder()
                 .uri(urlGetTaskId)
                 .GET().build();
-        client.send(addRequest, HttpResponse.BodyHandlers.ofString());
         HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
         Task returnedTask = gson.fromJson(response.body(), Task.class);
         assertEquals(200, response.statusCode());
-        assertEquals(task.getName(), returnedTask.getName());
+        assertEquals(task, returnedTask);
     }
+
+    @Test
+    public void getEpicTest() throws IOException, InterruptedException {
+        Epic epic = new Epic("Epic1", "Описание");
+        manager.createEpic(epic);
+        HttpClient client = HttpClient.newHttpClient();
+        URI urlGetEpicId = URI.create("http://localhost:8080/epics/1");
+
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(urlGetEpicId)
+                .GET().build();
+        HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+        System.out.println(response.body());
+        Epic returnedEpic = gson.fromJson(response.body(), Epic.class);
+        assertEquals(200, response.statusCode());
+        assertEquals(epic, returnedEpic);
+    }
+
+    @Test
+    public void getSubtaskTest() throws IOException, InterruptedException {
+        Epic epic = new Epic("Epic1", "Описание");
+        manager.createEpic(epic);
+        Subtask subtask = new Subtask("Subtask1", "Описание", epic.getId());
+        manager.createSubtask(subtask);
+        HttpClient client = HttpClient.newHttpClient();
+        URI urlGetSubtasksId = URI.create("http://localhost:8080/subtasks/2");
+        System.out.println(epic);
+        System.out.println(subtask);
+
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(urlGetSubtasksId)
+                .GET().build();
+        HttpResponse<String> response = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+
+        Subtask returnedSubtask = gson.fromJson(response.body(), Subtask.class);
+        assertEquals(200, response.statusCode());
+        assertEquals(subtask, returnedSubtask);
+    }
+
+    @Test
+    public void validateExceptionTest() throws IOException, InterruptedException {
+        Task task1 = new Task("Task1", "Testing task 1", Status.NEW, LocalDateTime.of(2015, 10, 25, 13, 20), Duration.ofMinutes(60));
+        Task task2 = new Task("Task2", "Testing task 2", Status.NEW, LocalDateTime.of(2015, 10, 25, 13, 30), Duration.ofMinutes(60));
+        String task2Json = gson.toJson(task2);
+        manager.createTask(task1);
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/tasks");
+        HttpRequest request2 = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(task2Json)).build();
+        HttpResponse<String> response2 = client.send(request2, HttpResponse.BodyHandlers.ofString());
+        assertEquals(406, response2.statusCode());
+        assertEquals("Данная задача пересекается с предыдущей", response2.body());
+    }
+
+    @Test
+    public void historyTest() throws IOException, InterruptedException {
+        Task task1 = new Task("Task1", "Testing task 1", Status.NEW, LocalDateTime.of(2015, 10, 25, 13, 20), Duration.ofMinutes(60));
+        manager.createTask(task1);
+        Task task2 = new Task("Task2", "Testing task 2", Status.NEW, LocalDateTime.of(2015, 11, 25, 13, 30), Duration.ofMinutes(60));
+        manager.createTask(task2);
+        Epic epic = new Epic("Epic", "Testing epic", Status.NEW, LocalDateTime.of(2015, 12, 25, 13, 20), Duration.ofMinutes(60));
+        manager.createEpic(epic);
+        Subtask subtask = new Subtask("Subtask", "Testing subtask", Status.NEW, LocalDateTime.of(2016, 10, 25, 13, 30), Duration.ofMinutes(60), epic.getId());
+        manager.createSubtask(subtask);
+        assertEquals(0, manager.history().size());
+        manager.getTask(task1.getId());
+        manager.getTask(task2.getId());
+        manager.getEpic(epic.getId());
+        manager.getSubtask(subtask.getId());
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/history");
+        HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String jsonResponse = response.body();
+        ArrayList<Task> taskList =gson.fromJson(jsonResponse, new TasksListTypeToken().getType());
+        assertEquals(4, taskList.size());
+    }
+
+    @Test
+    public void prioritizedTest() throws IOException, InterruptedException {
+        Task task1 = new Task("Task1", "Testing task 1", Status.NEW, LocalDateTime.of(2010, 10, 25, 13, 20), Duration.ofMinutes(60));
+        manager.createTask(task1);
+        Task task2 = new Task("Task2", "Testing task 2", Status.NEW, LocalDateTime.of(2014, 11, 25, 13, 30), Duration.ofMinutes(60));
+        manager.createTask(task2);
+        Epic epic = new Epic("Epic", "Testing epic", Status.NEW, LocalDateTime.of(2012, 12, 25, 13, 20), Duration.ofMinutes(60));
+        manager.createEpic(epic);
+        Subtask subtask = new Subtask("Subtask", "Testing subtask", Status.NEW, LocalDateTime.of(2013, 10, 25, 13, 30), Duration.ofMinutes(60), epic.getId());
+        manager.createSubtask(subtask);
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/prioritized");
+        HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String jsonResponse = response.body();
+        System.out.println(jsonResponse);
+        ArrayList<Task> prioritizedList = gson.fromJson(jsonResponse, new TasksListTypeToken().getType());
+        assertEquals(prioritizedList.get(0), task1);
+        assertEquals(prioritizedList.get(1), subtask);
+        assertEquals(prioritizedList.get(2), task2);
+    }
+
+
+
+
 }

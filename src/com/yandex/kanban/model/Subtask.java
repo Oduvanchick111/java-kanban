@@ -37,11 +37,11 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "SubTask{" +
+        return "Type: '"+ getType() +"' {" +
                 "name='" + getName() +
                 ", description='" + getDetails() +
-                ", id=" + getId() + '\'' +
                 ", status=" + getStatus() + '\'' +
+                ", id=" + getId() + '\'' +
                 ", StartTime=" + (getStartTime() != null ? getStartTime().format(formatter) : null) + '\'' +
                 ", duration=" + (getDuration() != null ? getDuration().toMinutes() : null) + '\'' +
                 ", epicId='" + epicId +

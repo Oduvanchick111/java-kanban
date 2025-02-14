@@ -111,7 +111,8 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("Task{name='%s', details='%s', status=%s, id=%d, startTime=%s, duration=%s}",
+        return String.format("Type: '%s' {name='%s', details='%s', status=%s, id=%d, startTime=%s, duration=%s}",
+                getType(),
                 name,
                 details,
                 status,
@@ -133,4 +134,5 @@ public class Task {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

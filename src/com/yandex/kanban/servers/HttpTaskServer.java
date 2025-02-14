@@ -43,6 +43,7 @@ public class HttpTaskServer {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         gsonBuilder.registerTypeAdapter(Duration.class, new DurationAdapter());
+        gsonBuilder.registerTypeAdapter(Task.class, new TaskDeserializer());
         return gsonBuilder.create();
     }
 
@@ -221,13 +222,16 @@ public class HttpTaskServer {
                 try {
                     Epic epic = gson.fromJson(json, Epic.class);
                     id = epic.getId();
-                    if (id != 0) {
+                    if (id != 0 && taskManager.getAllEpics().contains(epic)) {
                         taskManager.updateEpic(epic);
                         System.out.println("Был запрос на обновление задачи");
                         writeResponse(exchange, "Задача обновлена", 201);
-                    } else {
+                    } else if (id == 0){
                         taskManager.createEpic(epic);
                         writeResponse(exchange, "Задача добавлена", 201);
+                    } else {
+                        writeResponse(exchange, "Такой задачи не существует", 404);
+                        throw new NotFoundException("Такой задачи нет");
                     }
                 } catch (JsonSyntaxException e) {
                     System.out.println("JsonSyntaxException");
