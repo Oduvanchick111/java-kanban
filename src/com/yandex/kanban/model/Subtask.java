@@ -37,7 +37,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Type: '"+ getType() +"' {" +
+        return "Type: '" + getType() + "' {" +
                 "name='" + getName() +
                 ", description='" + getDetails() +
                 ", status=" + getStatus() + '\'' +

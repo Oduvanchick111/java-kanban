@@ -211,7 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
             boolean allDone = true;
             boolean allNew = true;
             for (Integer subtaskId : epic.getSubtasksId()) {
-                Status  subtaskStatus = subtasks.get(subtaskId).getStatus();
+                Status subtaskStatus = subtasks.get(subtaskId).getStatus();
                 if (subtaskStatus != Status.DONE) {
                     allDone = false;
                 }
