@@ -183,9 +183,9 @@ public class HttpTaskServer {
                         ArrayList<Subtask> subtasks = new ArrayList<>();
                         for (Integer subtaskId : epic.getSubtasksId()) {
                             subtasks.add(taskManager.getSubtask(subtaskId));
-                            response = subtasks.toString();
-                            writeResponse(exchange, response, 200);
                         }
+                        response = gson.toJson(subtasks);
+                        writeResponse(exchange, response, 200);
                     } catch (NotFoundException e) {
                         writeResponse(exchange, "Задачи с таким id не существует", 404);
                     }

@@ -7,6 +7,7 @@ import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.servers.HttpTaskServer;
+import com.yandex.kanban.servers.SubtasksListTypeToken;
 import com.yandex.kanban.servers.TasksListTypeToken;
 import com.yandex.kanban.service.InMemoryTaskManager;
 import com.yandex.kanban.service.TaskManager;
@@ -287,14 +288,32 @@ public class HttpTaskServerTest {
         assertEquals(1, epicsFromManager.size());
         HttpClient client = HttpClient.newHttpClient();
         URI urlTasks = URI.create("http://localhost:8080/tasks/1");
-        URI urlEpics = URI.create("http://localhost:8080/epics/1");
+        URI urlEpics = URI.create("http://localhost:8080/epics/2");
         HttpRequest requestTask = HttpRequest.newBuilder().uri(urlTasks).DELETE().build();
         HttpRequest requestEpic = HttpRequest.newBuilder().uri(urlEpics).DELETE().build();
         HttpResponse<String> responseTask = client.send(requestTask, HttpResponse.BodyHandlers.ofString());
         HttpResponse<String> responseEpic = client.send(requestEpic, HttpResponse.BodyHandlers.ofString());
         List<Task> tasksAfterDelete = manager.getAllTasks();
-//        List<Epic> epicsAfterDelete = manager.getAllEpics();
+        List<Epic> epicsAfterDelete = manager.getAllEpics();
         assertEquals(0, tasksAfterDelete.size());
-//        assertEquals(0, epicsAfterDelete.size());
+        assertEquals(0, epicsAfterDelete.size());
+    }
+
+    @Test
+    public void getEpicSubtasksTest() throws IOException, InterruptedException {
+        Epic epic = new Epic("Эпик1", "Описание1");
+        manager.createEpic(epic);
+        Subtask subtask1 = new Subtask("Сабтаск1", "Описание1", 1);
+        Subtask subtask2 = new Subtask("Сабтаск2", "Описание2", 1);
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/epics/1/subtasks");
+        HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String jsonResponse = response.body();
+        System.out.println(jsonResponse);
+        ArrayList<Task> subtasksList = gson.fromJson(jsonResponse, new SubtasksListTypeToken().getType());
+        assertEquals(subtasksList.size(), 2);
     }
 }
