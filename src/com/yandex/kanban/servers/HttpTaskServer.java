@@ -43,7 +43,6 @@ public class HttpTaskServer {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         gsonBuilder.registerTypeAdapter(Duration.class, new DurationAdapter());
-        gsonBuilder.registerTypeAdapter(Task.class, new TaskDeserializer());
         return gsonBuilder.create();
     }
 
@@ -101,16 +100,11 @@ public class HttpTaskServer {
                     } catch (NotFoundException e) {
                         writeResponse(exchange, "Задачи с таким id не существует", 404);
                     }
-
                 }
                 break;
 
             case "DELETE":
-                if (splitPath.length == 2) {
-                    taskManager.removeAllTasks();
-                    System.out.println("Был запрос на удаление всех задач");
-                    writeResponse(exchange, "были удалены все задачи", 201);
-                } else {
+                if (splitPath.length == 3) {
                     try {
                         id = Integer.parseInt(splitPath[2]);
                         taskManager.removeTaskById(id);
@@ -119,8 +113,11 @@ public class HttpTaskServer {
                     } catch (NotFoundException e) {
                         writeResponse(exchange, "Задачи с таким id не существует", 404);
                     }
+                } else {
+                    writeResponse(exchange, "Такого эндпоинта не существует", 406);
                 }
                 break;
+
 
             case "POST":
                 String json = readText(exchange);
@@ -196,11 +193,7 @@ public class HttpTaskServer {
                 break;
 
             case "DELETE":
-                if (splitPath.length == 2) {
-                    taskManager.removeAllEpics();
-                    System.out.println("Был запрос на удаление всех задач");
-                    writeResponse(exchange, "были удалены все задачи", 201);
-                } else {
+                if (splitPath.length == 3) {
                     try {
                         id = Integer.parseInt(splitPath[2]);
                         taskManager.removeEpicById(id);
@@ -209,6 +202,8 @@ public class HttpTaskServer {
                     } catch (NotFoundException e) {
                         writeResponse(exchange, "Задачи с таким id не существует", 404);
                     }
+                } else {
+                    writeResponse(exchange, "Такого эндпоинта не существует", 406);
                 }
                 break;
 
@@ -226,7 +221,7 @@ public class HttpTaskServer {
                         taskManager.updateEpic(epic);
                         System.out.println("Был запрос на обновление задачи");
                         writeResponse(exchange, "Задача обновлена", 201);
-                    } else if (id == 0){
+                    } else if (id == 0) {
                         taskManager.createEpic(epic);
                         writeResponse(exchange, "Задача добавлена", 201);
                     } else {
@@ -273,11 +268,7 @@ public class HttpTaskServer {
                 break;
 
             case "DELETE":
-                if (splitPath.length == 2) {
-                    taskManager.removeAllTasks();
-                    System.out.println("Был запрос на удаление всех задач");
-                    writeResponse(exchange, "были удалены все задачи", 201);
-                } else {
+                if (splitPath.length == 3) {
                     try {
                         id = Integer.parseInt(splitPath[2]);
                         taskManager.removeSubtaskById(id);
@@ -286,6 +277,8 @@ public class HttpTaskServer {
                     } catch (NotFoundException e) {
                         writeResponse(exchange, "Задачи с таким id не существует", 404);
                     }
+                } else {
+                    writeResponse(exchange, "Такого эндпоинта не существует", 406);
                 }
                 break;
 
