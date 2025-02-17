@@ -37,14 +37,14 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Type: '" + getType() + "' {" +
-                "name='" + getName() +
-                ", description='" + getDetails() +
-                ", status=" + getStatus() + '\'' +
-                ", id=" + getId() + '\'' +
-                ", StartTime=" + (getStartTime() != null ? getStartTime().format(formatter) : null) + '\'' +
-                ", duration=" + (getDuration() != null ? getDuration().toMinutes() : null) + '\'' +
-                ", epicId='" + epicId +
-                '}';
+        return String.format("Type: '%s' {name= '%s', description= '%s', status= '%s', id= '%d', startTime= '%s', duration= '%s', epicId= '%d'}",
+                getType(),
+                getName(),
+                getDetails(),
+                getStatus(),
+                getId(),
+                (getStartTime() != null ? getStartTime().format(formatter) : "null"),
+                (getDuration() != null ? getDuration().toMinutes() : "null"),
+                getEpicId());
     }
 }

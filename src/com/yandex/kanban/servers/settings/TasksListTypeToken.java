@@ -1,4 +1,4 @@
-package com.yandex.kanban.servers;
+package com.yandex.kanban.servers.settings;
 
 import com.google.gson.reflect.TypeToken;
 import com.yandex.kanban.model.Task;

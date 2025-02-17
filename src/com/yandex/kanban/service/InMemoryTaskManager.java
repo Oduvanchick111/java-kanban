@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.yandex.kanban.model.Task.formatter;
 
 public class InMemoryTaskManager implements TaskManager {
     private int countTasks = 1;
@@ -287,28 +286,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     public static void main(String[] args) throws IOException {
         TaskManager inMemoryTaskManager = Managers.getDefault();
-        Task task4 = new Task("Таск4", "Описание4");
-        Task task = new Task("Таск1", "Описание1", Status.NEW, LocalDateTime.of(2008, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
-        Task task1 = new Task("Таск2", "Описание1", Status.NEW, LocalDateTime.of(2005, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
-        Task task2 = new Task("Таск3", "Описание1", Status.NEW, LocalDateTime.of(2007, 1, 1, 0, 0, 0), Duration.ofMinutes(40));
         Epic epic = new Epic("Эпик1", "Описание", Status.NEW);
         inMemoryTaskManager.createEpic(epic);
         Subtask subtask = new Subtask("Сабтаск1", "Описание1", Status.NEW, LocalDateTime.of(2009, 1, 1, 0, 0, 0), Duration.ofMinutes(40), epic.getId());
-        Subtask subtask1 = new Subtask("Сабтаск1", "Описание1", Status.NEW, LocalDateTime.of(2010, 1, 1, 0, 0, 0), Duration.ofMinutes(40), epic.getId());
-        inMemoryTaskManager.createTask(task);
-        inMemoryTaskManager.createTask(task1);
-        inMemoryTaskManager.createTask(task2);
-        inMemoryTaskManager.createTask(task4);
         inMemoryTaskManager.createSubtask(subtask);
-        inMemoryTaskManager.createSubtask(subtask1);
-        System.out.println(inMemoryTaskManager.getPrioritizedTasks());
-        System.out.println("----------------------------------------------------------");
-        LocalDateTime start = epic.getStartTime();
-        LocalDateTime end = epic.getEndTime();
-        System.out.println(start.format(formatter));
-        System.out.println(end.format(formatter));
-        System.out.println(epic.getDuration().toMinutes());
-        Task task3 = new Task("хуй", "пизда");
+        System.out.println(subtask);
     }
 }
 

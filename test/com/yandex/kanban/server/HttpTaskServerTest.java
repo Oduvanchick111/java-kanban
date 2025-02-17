@@ -1,14 +1,13 @@
 package com.yandex.kanban.server;
 
 import com.google.gson.Gson;
-import com.yandex.kanban.exceptions.ValidateException;
 import com.yandex.kanban.model.Epic;
 import com.yandex.kanban.model.Status;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.servers.HttpTaskServer;
-import com.yandex.kanban.servers.SubtasksListTypeToken;
-import com.yandex.kanban.servers.TasksListTypeToken;
+import com.yandex.kanban.servers.settings.SubtasksListTypeToken;
+import com.yandex.kanban.servers.settings.TasksListTypeToken;
 import com.yandex.kanban.service.InMemoryTaskManager;
 import com.yandex.kanban.service.TaskManager;
 import org.junit.jupiter.api.AfterEach;
