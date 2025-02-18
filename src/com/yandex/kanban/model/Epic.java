@@ -3,10 +3,11 @@ package com.yandex.kanban.model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
-    private final ArrayList<Integer> subtasksId = new ArrayList<>();
     private LocalDateTime endTime;
+    private final List<Integer> subtasksId = new ArrayList<>();
 
     public Epic(String name, String details) {
         super(name, details);
@@ -20,9 +21,14 @@ public class Epic extends Task {
         super(name, details, status, startTime, duration);
     }
 
-    public ArrayList<Integer> getSubtasksId() {
+    public Epic(String name, String details, int id, Status status, LocalDateTime startTime, Duration duration) {
+        super(name, details, id, status, startTime, duration);
+    }
+
+    public List<Integer> getSubtasksId() {
         return subtasksId;
     }
+
 
     @Override
     public Type getType() {
@@ -40,7 +46,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{" +
+        return "Type: + " + getType() + "{" +
                 "name='" + getName() +
                 ", description='" + getDetails() +
                 ", id=" + getId() +

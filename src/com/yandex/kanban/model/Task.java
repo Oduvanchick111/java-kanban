@@ -41,6 +41,15 @@ public class Task {
         this.duration = duration;
     }
 
+    public Task(String name, String details, int id, Status status, LocalDateTime startTime, Duration duration) {
+        this.name = name;
+        this.details = details;
+        this.id = id;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -102,7 +111,8 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("Task{name='%s', details='%s', status=%s, id=%d, startTime=%s, duration=%s}",
+        return String.format("Type: '%s' {name='%s', details='%s', status=%s, id=%d, startTime=%s, duration=%s}",
+                getType(),
                 name,
                 details,
                 status,
@@ -124,4 +134,5 @@ public class Task {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

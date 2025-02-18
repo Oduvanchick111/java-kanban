@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-
     private final Map<Integer, Node<Task>> historyMap = new HashMap<>();
     private Node<Task> tail;
     private Node<Task> head;
@@ -80,6 +79,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         removeNode(historyMap.get(id));
         historyMap.remove(id);
     }
+
 
     private static class Node<T> {
         private final T data;

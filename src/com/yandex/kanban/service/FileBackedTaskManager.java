@@ -1,7 +1,7 @@
 package com.yandex.kanban.service;
 
-import com.yandex.kanban.Exceptions.ManagerSaveException;
-import com.yandex.kanban.Exceptions.ValidateException;
+import com.yandex.kanban.exceptions.ManagerSaveException;
+import com.yandex.kanban.exceptions.ValidateException;
 import com.yandex.kanban.model.*;
 
 import java.io.*;
